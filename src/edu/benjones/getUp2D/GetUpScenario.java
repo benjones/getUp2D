@@ -13,16 +13,16 @@ import edu.benjones.getUp2D.characters.Biped9;
 
 public class GetUpScenario {
 	public DebugDraw debugDraw;
-	
+
 	private World world;
 	private AABB worldAABB;
-	//create()
-	
+	// create()
+
 	public static final float framerate = 60;
 	public static final int iterationCount = 10;
-	
+
 	private boolean drawContactPoints;
-	
+
 	public GetUpScenario(DebugDraw g) {
 		debugDraw = g;
 		createWorld();
@@ -32,7 +32,7 @@ public class GetUpScenario {
 		worldAABB = new AABB();
 		worldAABB.lowerBound.set(-100, -100f);
 		worldAABB.upperBound.set(100, 100f);
-		Vec2 gravity = new Vec2(0f, 0f);//-10f);
+		Vec2 gravity = new Vec2(0f, -10f);
 		//skip sleeping, since there shouldn't be anything sleeping
 		world = new World(worldAABB, gravity, false);
 		world.setDebugDraw(debugDraw);
@@ -50,19 +50,22 @@ public class GetUpScenario {
 		ground.createShape(sd);
 		
 		Character bip = new Biped9(world);
+		float[] zeros = new float[bip.getStateSize()];
+		bip.setState(new Vec2(0f,0f), (float)(Math.PI/4), 
+				zeros);
 	}
 
 	public void step() {
 		debugDraw.setFlags(0);
-		//debugDraw.appendFlags(DebugDraw.e_aabbBit);
-		//debugDraw.appendFlags(DebugDraw.e_coreShapeBit);
+		// debugDraw.appendFlags(DebugDraw.e_aabbBit);
+		// debugDraw.appendFlags(DebugDraw.e_coreShapeBit);
 		debugDraw.appendFlags(DebugDraw.e_shapeBit);
 		debugDraw.appendFlags(DebugDraw.e_jointBit);
-		
-		//drawing gets done here I guess?
-		world.step((float) (1.0/framerate), iterationCount);
+
+		// drawing gets done here I guess?
+		world.step((float) (1.0 / framerate), iterationCount);
 		debugDraw.drawString(5, 12, "test", new Color3f(255f, 255f, 255f));
-		
+
 	}
 
 	public void setDrawContactPoints(boolean drawContactPoints) {

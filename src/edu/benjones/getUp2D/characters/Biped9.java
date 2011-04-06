@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import org.jbox2d.collision.FilterData;
 import org.jbox2d.collision.shapes.PolygonDef;
 import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.common.Mat22;
 import org.jbox2d.common.Vec2;
+import org.jbox2d.common.XForm;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.World;
@@ -19,7 +21,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			rightLowerLeg, leftUpperArm, leftLowerArm, rightUpperArm,
 			rightLowerArm;
 
-	private Joint leftHip, rightHip, leftKnee, rightKnee, leftShoulder,
+	private RevoluteJoint leftHip, rightHip, leftKnee, rightKnee, leftShoulder,
 			rightShoulder, leftElbow, rightElbow;
 
 	private final Vec2 shoulderTorsoOffset, hipTorsoOffset,
@@ -30,7 +32,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 	private final float limbDensity = 73;
 
 	private ArrayList<Body> bodies;
-	private ArrayList<Joint> joints;
+	private ArrayList<RevoluteJoint> joints;
 
 	public Biped9(World w) {
 
@@ -194,7 +196,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		bodies.add(rightUpperLeg);
 		bodies.add(rightLowerLeg);
 
-		joints = new ArrayList<Joint>();
+		joints = new ArrayList<RevoluteJoint>();
 		joints.add(leftShoulder);
 		joints.add(rightShoulder);
 		joints.add(leftElbow);
@@ -222,16 +224,28 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 	public void setState(Vec2 position, float orientation,
 			float[] relativeOrientations) {
 		
+		Vec2 zero = new Vec2(0,0);
 		//set up the root stuff, then handle all the other bodies
 		root.setXForm(position, orientation);
+		root.setAngularVelocity(0f);
+		root.setLinearVelocity(zero);
+		
 		Vec2 pos;
 		float angle;
-		Body parent;
+		Body parent, child;
+		RevoluteJoint j;
+		XForm xf = new XForm();
 		for(int i = 0; i < joints.size(); ++i){
-			parent = joints.get(i).getBody1(); 
+			j = joints.get(i);
+			parent = j.getBody1(); 
+			child = j.getBody2();
 			angle = parent.getAngle() + relativeOrientations[i];
-			
-			// position = parent.getPosition().add(joints.get(i).)
+			xf.R = Mat22.createRotationalTransform(angle);
+			position = j.getAnchor1().sub(
+					XForm.mul(xf, j.m_localAnchor2));
+			child.setXForm(position, angle);
+			child.setAngularVelocity(0f);
+			child.setLinearVelocity(zero);
 		}
 
 	}
@@ -247,6 +261,9 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 				s.setFilterData(fd);
 			}
 		}
+	}
+	public int getStateSize(){
+		return this.joints.size();
 	}
 
 }

@@ -22,4 +22,6 @@ public interface Character {
 	 * @param relativeOrientations to be interpreted by the concrete characters
 	 */
 	public void setState(Vec2 position, float orientation, float[] relativeOrientations);
+
+	public int getStateSize();
 }
