@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jbox2d.collision.FilterData;
+import org.jbox2d.collision.MassData;
 import org.jbox2d.collision.shapes.PolygonDef;
 import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Mat22;
@@ -15,25 +16,28 @@ import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
+import edu.benjones.getUp2D.Character;
 
 public class Biped9 implements edu.benjones.getUp2D.Character {
 
-	private Body root, leftUpperLeg, leftLowerLeg, rightUpperLeg,
+	protected Body root, leftUpperLeg, leftLowerLeg, rightUpperLeg,
 			rightLowerLeg, leftUpperArm, leftLowerArm, rightUpperArm,
 			rightLowerArm;
 
-	private RevoluteJoint leftHip, rightHip, leftKnee, rightKnee, leftShoulder,
+	protected RevoluteJoint leftHip, rightHip, leftKnee, rightKnee, leftShoulder,
 			rightShoulder, leftElbow, rightElbow;
 
-	private final Vec2 shoulderTorsoOffset, hipTorsoOffset,
+	protected final Vec2 shoulderTorsoOffset, hipTorsoOffset,
 			shoulderUpperArmOffset, hipUpperLegOffset, kneeUpperLegOffset,
 			kneeLowerLegOffset, elbowUpperArmOffset, elbowLowerArmOffset;
 
 	private final float torsoDensity = 173;
 	private final float limbDensity = 73;
 
-	private ArrayList<Body> bodies;
-	private ArrayList<RevoluteJoint> joints;
+	private final int filterGroup = -1;
+	
+	protected ArrayList<Body> bodies;
+	protected ArrayList<RevoluteJoint> joints;
 
 	public Biped9(World w) {
 
@@ -53,6 +57,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		PolygonDef rootPolyDef = new PolygonDef();
 		rootPolyDef.setAsBox(.16f, .39f);
 		rootPolyDef.density = torsoDensity;// mass/area
+		rootPolyDef.filter.groupIndex = filterGroup;
 
 		root = w.createBody(rootDef);
 		root.createShape(rootPolyDef);
@@ -72,6 +77,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		upperArmPolyDef = new PolygonDef();
 		upperArmPolyDef.setAsBox(.05f, .15f);
 		upperArmPolyDef.density = limbDensity;
+		upperArmPolyDef.filter.groupIndex = filterGroup;
 
 		leftUpperArm = w.createBody(upperArmDef);
 		leftUpperArm.createShape(upperArmPolyDef);
@@ -92,6 +98,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		lowerArmPolyDef = new PolygonDef();
 		lowerArmPolyDef.setAsBox(.05f, .11f);
 		lowerArmPolyDef.density = limbDensity;
+		lowerArmPolyDef.filter.groupIndex = filterGroup;
 
 		leftLowerArm = w.createBody(lowerArmDef);
 		leftLowerArm.createShape(lowerArmPolyDef);
@@ -134,6 +141,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		upperLegPolyDef = new PolygonDef();
 		upperLegPolyDef.setAsBox(.05f, .19f);
 		upperLegPolyDef.density = limbDensity;
+		upperLegPolyDef.filter.groupIndex = filterGroup;
 
 		leftUpperLeg = w.createBody(upperLegDef);
 		leftUpperLeg.createShape(upperLegPolyDef);
@@ -160,6 +168,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		lowerLegPolyDef = new PolygonDef();
 		lowerLegPolyDef.setAsBox(.05f, .16f);
 		lowerLegPolyDef.density = limbDensity;
+		lowerLegPolyDef.filter.groupIndex = filterGroup;
 
 		leftLowerLeg = w.createBody(lowerLegDef);
 		leftLowerLeg.createShape(lowerLegPolyDef);
@@ -207,7 +216,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		joints.add(leftKnee);
 		joints.add(rightKnee);
 
-		setGroupIndex(-1);
+		//setGroupIndex(-1);
 	}
 
 	public Body getRoot() {
@@ -277,4 +286,15 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		return joints;
 	}
 
+	public static Character makeCharacter(World w){
+		return new Biped9(w);
+	}
+	
+	public static Character getStaticCharacter(World w){
+		Character ret = makeCharacter(w);
+		for(Body b : ret.getBodies())
+			b.setMass(new MassData());
+		return ret;
+	}
+	
 }

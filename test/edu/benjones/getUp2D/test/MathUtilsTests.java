@@ -1,3 +1,5 @@
+package edu.benjones.getUp2D.test;
+
 import static org.junit.Assert.*;
 
 import org.junit.Test;

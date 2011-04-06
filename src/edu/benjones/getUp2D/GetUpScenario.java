@@ -9,12 +9,16 @@ import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.DebugDraw;
 import org.jbox2d.dynamics.World;
 
+import edu.benjones.getUp2D.Controllers.Controller;
+import edu.benjones.getUp2D.Controllers.PoseController;
 import edu.benjones.getUp2D.characters.Biped9;
 
 public class GetUpScenario {
 	public DebugDraw debugDraw;
 
-	private World world;
+	protected World world;
+	protected Character character, desiredPoseCharacter;
+	protected Controller controller;
 	private AABB worldAABB;
 	// create()
 
@@ -23,9 +27,16 @@ public class GetUpScenario {
 
 	private boolean drawContactPoints;
 
+	private boolean drawDesiredPose;
+	private boolean desiredPoseSetup;
+
 	public GetUpScenario(DebugDraw g) {
+		drawDesiredPose = true;//false;
+		desiredPoseSetup = false;
 		debugDraw = g;
 		createWorld();
+		setupCharacter();
+		setupController();
 	}
 
 	public void createWorld() {
@@ -33,26 +44,37 @@ public class GetUpScenario {
 		worldAABB.lowerBound.set(-100, -100f);
 		worldAABB.upperBound.set(100, 100f);
 		Vec2 gravity = new Vec2(0f, -10f);
-		//skip sleeping, since there shouldn't be anything sleeping
+		// skip sleeping, since there shouldn't be anything sleeping
 		world = new World(worldAABB, gravity, false);
 		world.setDebugDraw(debugDraw);
 		setDrawContactPoints(false);
-		
+
 		debugDraw.setCamera(0f, 0f, 150f);
-		
-		//setup ground
+
+		// setup ground
 		PolygonDef sd = new PolygonDef();
 		sd.setAsBox(50f, 3f);
-		
+
 		BodyDef bd = new BodyDef();
 		bd.position.set(0f, -5f);
 		Body ground = world.createBody(bd);
 		ground.createShape(sd);
-		
-		Character bip = new Biped9(world);
-		float[] zeros = new float[bip.getStateSize()];
-		bip.setState(new Vec2(0f,0f), (float)(Math.PI/4), 
-				zeros);
+
+	}
+
+	public void setupCharacter() {
+		character = new Biped9(world);
+		float[] zeros = new float[character.getStateSize()];
+		character.setState(new Vec2(0f, 0f), (float) (-Math.PI / 4), zeros);
+	}
+
+	public void setupController() {
+		controller = new PoseController(character);
+	}
+
+	public void setupDesiredPoseCharacter() {
+		desiredPoseCharacter = Biped9.getStaticCharacter(world);
+		desiredPoseSetup = true;
 	}
 
 	public void step() {
@@ -62,9 +84,26 @@ public class GetUpScenario {
 		debugDraw.appendFlags(DebugDraw.e_shapeBit);
 		debugDraw.appendFlags(DebugDraw.e_jointBit);
 
-		// drawing gets done here I guess?
-		world.step((float) (1.0 / framerate), iterationCount);
-		debugDraw.drawString(5, 12, "test", new Color3f(255f, 255f, 255f));
+		//rolling my own clear forces:
+		for(Body b = world.getBodyList(); b != null; b = b.getNext()){
+			b.m_force.setZero();
+			b.m_torque = 0f;
+		}
+		float timestep = (float) (1.0 / framerate)*.25f;
+		//drawing gets done here I guess?
+		controller.computeTorques(world,timestep);
+		world.step(timestep, iterationCount);
+
+		if (drawDesiredPose) {
+			if (!desiredPoseSetup)
+				setupDesiredPoseCharacter();
+			float [] desiredPose = ((PoseController)controller).getDesiredPose();
+			desiredPoseCharacter.setState(character.getRoot().getPosition()
+					.add(new Vec2(-.5f, .5f)), character.getRoot().getAngle(),
+					desiredPose);
+		}
+
+		// debugDraw.drawString(5, 12, "test", new Color3f(255f, 255f, 255f));
 
 	}
 
@@ -74,6 +113,14 @@ public class GetUpScenario {
 
 	public boolean getDrawContactPoints() {
 		return drawContactPoints;
+	}
+
+	public void setDrawDesiredPose(boolean drawDesiredPose) {
+		this.drawDesiredPose = drawDesiredPose;
+	}
+
+	public boolean getDrawDesiredPose() {
+		return drawDesiredPose;
 	}
 
 }

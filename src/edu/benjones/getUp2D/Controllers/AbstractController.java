@@ -4,7 +4,7 @@ import org.jbox2d.dynamics.World;
 
 import edu.benjones.getUp2D.Character;
 
-public abstract class AbstractController {
+public abstract class AbstractController implements Controller{
 
 	protected Character character;
 	public AbstractController(Character ch){

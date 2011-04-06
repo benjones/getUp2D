@@ -20,7 +20,8 @@ public class getUpMain extends PApplet {
 		size(800,800,P3D);
 		frameRate(GetUpScenario.framerate);
 		g = new ProcessingDebugDraw(this);
-		getUpScenario = new GetUpScenario(g);
+	
+		getUpScenario = new FixedBaseScenario(g);//GetUpScenario(g);
 		
 	}
 	/**
