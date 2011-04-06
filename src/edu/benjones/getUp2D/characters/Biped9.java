@@ -1,6 +1,7 @@
 package edu.benjones.getUp2D.characters;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.jbox2d.collision.FilterData;
 import org.jbox2d.collision.shapes.PolygonDef;
@@ -264,6 +265,16 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 	}
 	public int getStateSize(){
 		return this.joints.size();
+	}
+
+	@Override
+	public List<Body> getBodies() {
+		return bodies;
+	}
+
+	@Override
+	public List<RevoluteJoint> getJoints() {
+		return joints;
 	}
 
 }

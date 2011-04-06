@@ -1,8 +1,13 @@
 package edu.benjones.getUp2D;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.World;
+import org.jbox2d.dynamics.joints.Joint;
+import org.jbox2d.dynamics.joints.RevoluteJoint;
 
 public interface Character {
 
@@ -24,4 +29,6 @@ public interface Character {
 	public void setState(Vec2 position, float orientation, float[] relativeOrientations);
 
 	public int getStateSize();
+	public List<Body> getBodies();
+	public List<RevoluteJoint> getJoints();
 }
