@@ -20,6 +20,7 @@ public class PoseControllerTest extends PoseController {
 	public void computeTorques(World w, float dt){
 		elapsed += dt;
 		desiredPose[0] = (float) Math.sin(elapsed);
+		desiredPose[2] = (float) Math.sin(elapsed);
 		super.computeTorques(w, dt);
 	}
 	

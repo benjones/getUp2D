@@ -107,7 +107,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		elbowDef = new RevoluteJointDef();
 		elbowDef.initialize(leftUpperArm, leftLowerArm, leftUpperArm
 				.getPosition().add(elbowUpperArmOffset));
-		elbowDef.lowerAngle = (float) (-5 * Math.PI / 180.0);
+		elbowDef.lowerAngle = (float) (-Math.PI);
 		elbowDef.upperAngle = (float) (Math.PI);
 		elbowDef.enableLimit = true;
 
