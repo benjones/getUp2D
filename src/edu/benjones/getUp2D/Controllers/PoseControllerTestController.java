@@ -5,11 +5,11 @@ import org.jbox2d.dynamics.World;
 import edu.benjones.getUp2D.Controllers.Controller;
 import edu.benjones.getUp2D.Character;
 
-public class PoseControllerTest extends PoseController {
+public class PoseControllerTestController extends PoseController {
 
 	private float elapsed;
 	
-	public PoseControllerTest(Character ch){
+	public PoseControllerTestController(Character ch){
 		super(ch);
 	
 		for(int i = 0; i < desiredPose.length; ++i)

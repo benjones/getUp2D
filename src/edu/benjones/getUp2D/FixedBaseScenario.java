@@ -3,7 +3,8 @@ package edu.benjones.getUp2D;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.DebugDraw;
 
-import edu.benjones.getUp2D.Controllers.PoseControllerTest;
+import edu.benjones.getUp2D.Controllers.GravityCompensationTestController;
+import edu.benjones.getUp2D.Controllers.PoseControllerTestController;
 import edu.benjones.getUp2D.characters.Biped9FixedBase;
 
 public class FixedBaseScenario extends GetUpScenario {
@@ -18,6 +19,7 @@ public class FixedBaseScenario extends GetUpScenario {
 	}
 	
 	public void setupController(){
-		controller = new PoseControllerTest(character);
+		controller = new GravityCompensationTestController(character);
+		//controller = new PoseControllerTestController(character);
 	}
 }

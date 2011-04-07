@@ -17,6 +17,8 @@ import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
 import edu.benjones.getUp2D.Character;
+import edu.benjones.getUp2D.Controllers.VirtualForce;
+import edu.benjones.getUp2D.Utils.PhysicsUtils;
 
 public class Biped9 implements edu.benjones.getUp2D.Character {
 
@@ -24,8 +26,8 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			rightLowerLeg, leftUpperArm, leftLowerArm, rightUpperArm,
 			rightLowerArm;
 
-	protected RevoluteJoint leftHip, rightHip, leftKnee, rightKnee, leftShoulder,
-			rightShoulder, leftElbow, rightElbow;
+	protected RevoluteJoint leftHip, rightHip, leftKnee, rightKnee,
+			leftShoulder, rightShoulder, leftElbow, rightElbow;
 
 	protected final Vec2 shoulderTorsoOffset, hipTorsoOffset,
 			shoulderUpperArmOffset, hipUpperLegOffset, kneeUpperLegOffset,
@@ -35,11 +37,17 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 	private final float limbDensity = 73;
 
 	private final int filterGroup = -1;
-	
+
 	protected ArrayList<Body> bodies;
 	protected ArrayList<RevoluteJoint> joints;
+	protected ArrayList<Limb> arms;
+	protected ArrayList<Limb> legs;
+	
+	protected World world;
 
 	public Biped9(World w) {
+
+		world = w;
 
 		shoulderTorsoOffset = new Vec2(.1f, .35f);
 		hipTorsoOffset = new Vec2(0f, -.35f);
@@ -216,7 +224,16 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		joints.add(leftKnee);
 		joints.add(rightKnee);
 
-		//setGroupIndex(-1);
+		arms = new ArrayList<Limb>();
+		legs = new ArrayList<Limb>();
+		arms.add(new Bip9Limb(leftShoulder));
+		arms.add(new Bip9Limb(rightShoulder));
+		
+		legs.add(new Bip9Limb(leftHip));
+		legs.add(new Bip9Limb(rightHip));
+		
+		
+		// setGroupIndex(-1);
 	}
 
 	public Body getRoot() {
@@ -233,26 +250,25 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 	 */
 	public void setState(Vec2 position, float orientation,
 			float[] relativeOrientations) {
-		
-		Vec2 zero = new Vec2(0,0);
-		//set up the root stuff, then handle all the other bodies
+
+		Vec2 zero = new Vec2(0, 0);
+		// set up the root stuff, then handle all the other bodies
 		root.setXForm(position, orientation);
 		root.setAngularVelocity(0f);
 		root.setLinearVelocity(zero);
-		
+
 		Vec2 pos;
 		float angle;
 		Body parent, child;
 		RevoluteJoint j;
 		XForm xf = new XForm();
-		for(int i = 0; i < joints.size(); ++i){
+		for (int i = 0; i < joints.size(); ++i) {
 			j = joints.get(i);
-			parent = j.getBody1(); 
+			parent = j.getBody1();
 			child = j.getBody2();
 			angle = parent.getAngle() + relativeOrientations[i];
 			xf.R = Mat22.createRotationalTransform(angle);
-			position = j.getAnchor1().sub(
-					XForm.mul(xf, j.m_localAnchor2));
+			position = j.getAnchor1().sub(XForm.mul(xf, j.m_localAnchor2));
 			child.setXForm(position, angle);
 			child.setAngularVelocity(0f);
 			child.setLinearVelocity(zero);
@@ -272,7 +288,8 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			}
 		}
 	}
-	public int getStateSize(){
+
+	public int getStateSize() {
 		return this.joints.size();
 	}
 
@@ -286,15 +303,54 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		return joints;
 	}
 
-	public static Character makeCharacter(World w){
+	public static Character makeCharacter(World w) {
 		return new Biped9(w);
 	}
-	
-	public static Character getStaticCharacter(World w){
+
+	public static Character getStaticCharacter(World w) {
 		Character ret = makeCharacter(w);
-		for(Body b : ret.getBodies())
+		for (Body b : ret.getBodies())
 			b.setMass(new MassData());
 		return ret;
 	}
-	
+
+	public class Bip9Limb implements Limb {
+		protected RevoluteJoint hip;
+
+		private Bip9Limb(RevoluteJoint hip){
+			this.hip = hip;
+		}
+		
+		@Override
+		public RevoluteJoint getBase() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void addGravityCompenstaionTorques(
+				List<VirtualForce> virtualForces) {
+			// TODO Auto-generated method stub
+			RevoluteJoint curr = hip;
+			Body b;
+			Vec2 zero = new Vec2(0f, 0f);
+			while (curr != null) {
+				b = curr.getBody2();
+				virtualForces.add(new VirtualForce(hip, b, zero, 
+						world.getGravity().mul(-b.getMass())));
+				curr = PhysicsUtils.getChildJoint(curr);
+			}
+		}
+	}
+
+	@Override
+	public List<Limb> getArms() {
+		return arms;
+	}
+
+	@Override
+	public List<Limb> getLegs() {
+		return legs;
+	}
+
 }

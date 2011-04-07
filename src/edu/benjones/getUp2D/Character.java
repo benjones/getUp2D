@@ -9,6 +9,8 @@ import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 
+import edu.benjones.getUp2D.Controllers.VirtualForce;
+
 public interface Character {
 
 	/**
@@ -32,8 +34,12 @@ public interface Character {
 	public List<Body> getBodies();
 	public List<RevoluteJoint> getJoints();
 	
-	public abstract class Limb {
-		public abstract RevoluteJoint getBase();
+	public List<Limb> getArms();
+	public List<Limb> getLegs();
+	
+	public interface Limb {
+		public RevoluteJoint getBase();
+		public void addGravityCompenstaionTorques(List<VirtualForce> virtualForces);
 		
 	}
 }

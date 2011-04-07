@@ -28,11 +28,13 @@ public class GetUpScenario {
 	private boolean drawContactPoints;
 
 	private boolean drawDesiredPose;
+	private boolean drawControllerExtras;
 	private boolean desiredPoseSetup;
 
 	public GetUpScenario(DebugDraw g) {
 		drawDesiredPose = true;//false;
 		desiredPoseSetup = false;
+		drawControllerExtras = true;
 		debugDraw = g;
 		createWorld();
 		setupCharacter();
@@ -103,6 +105,9 @@ public class GetUpScenario {
 					desiredPose);
 		}
 
+		if(drawControllerExtras){
+			controller.drawControllerExtras(debugDraw);
+		}
 		// debugDraw.drawString(5, 12, "test", new Color3f(255f, 255f, 255f));
 
 	}
@@ -121,6 +126,14 @@ public class GetUpScenario {
 
 	public boolean getDrawDesiredPose() {
 		return drawDesiredPose;
+	}
+
+	public void setDrawControllerExtras(boolean drawControllerExtras) {
+		this.drawControllerExtras = drawControllerExtras;
+	}
+
+	public boolean isDrawControllerExtras() {
+		return drawControllerExtras;
 	}
 
 }

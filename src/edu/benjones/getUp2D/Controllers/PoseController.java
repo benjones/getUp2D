@@ -2,6 +2,7 @@ package edu.benjones.getUp2D.Controllers;
 
 import java.util.List;
 
+import org.jbox2d.dynamics.DebugDraw;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
@@ -88,5 +89,10 @@ public class PoseController extends AbstractController {
 
 	public float[] getDesiredPose() {
 		return desiredPose;
+	}
+
+	@Override
+	public void drawControllerExtras(DebugDraw g) {
+				
 	}
 }
