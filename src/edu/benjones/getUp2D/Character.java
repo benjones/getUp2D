@@ -31,4 +31,9 @@ public interface Character {
 	public int getStateSize();
 	public List<Body> getBodies();
 	public List<RevoluteJoint> getJoints();
+	
+	public abstract class Limb {
+		public abstract RevoluteJoint getBase();
+		
+	}
 }
