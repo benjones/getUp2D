@@ -1,6 +1,7 @@
 package edu.benjones.getUp2D.characters;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.jbox2d.collision.FilterData;
@@ -31,7 +32,8 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 
 	protected final Vec2 shoulderTorsoOffset, hipTorsoOffset,
 			shoulderUpperArmOffset, hipUpperLegOffset, kneeUpperLegOffset,
-			kneeLowerLegOffset, elbowUpperArmOffset, elbowLowerArmOffset;
+			kneeLowerLegOffset, elbowUpperArmOffset, elbowLowerArmOffset,
+			legEEOffset, armEEOffset;
 
 	private final float torsoDensity = 173;
 	private final float limbDensity = 73;
@@ -42,7 +44,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 	protected ArrayList<RevoluteJoint> joints;
 	protected ArrayList<Limb> arms;
 	protected ArrayList<Limb> legs;
-	
+
 	protected World world;
 
 	public Biped9(World w) {
@@ -57,6 +59,8 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		kneeLowerLegOffset = new Vec2(0f, .13f);
 		elbowUpperArmOffset = new Vec2(0f, .12f);
 		elbowLowerArmOffset = new Vec2(0f, -.09f);
+		legEEOffset = new Vec2(0f, .16f);
+		armEEOffset = new Vec2(0f, .11f);
 
 		BodyDef rootDef = new BodyDef();
 		rootDef.position = new Vec2(0f, 0f);
@@ -224,15 +228,34 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		joints.add(leftKnee);
 		joints.add(rightKnee);
 
+		HashMap<RevoluteJoint, Integer> leftLegMap, rightLegMap, leftArmMap, rightArmMap;
+		leftLegMap = new HashMap<RevoluteJoint, Integer>();
+		leftLegMap.put(leftHip, joints.indexOf(leftHip));
+		leftLegMap.put(leftKnee, joints.indexOf(leftKnee));
+		rightLegMap = new HashMap<RevoluteJoint, Integer>();
+		rightLegMap.put(rightHip, joints.indexOf(rightHip));
+		rightLegMap.put(rightKnee, joints.indexOf(rightKnee));
+
+		leftArmMap = new HashMap<RevoluteJoint, Integer>();
+		leftArmMap.put(leftShoulder, joints.indexOf(leftShoulder));
+		leftArmMap.put(leftElbow, joints.indexOf(leftElbow));
+
+		rightArmMap = new HashMap<RevoluteJoint, Integer>();
+		rightArmMap.put(rightShoulder, joints.indexOf(rightShoulder));
+		rightArmMap.put(rightElbow, joints.indexOf(rightElbow));
+
 		arms = new ArrayList<Limb>();
 		legs = new ArrayList<Limb>();
-		arms.add(new Bip9Limb(leftShoulder));
-		arms.add(new Bip9Limb(rightShoulder));
-		
-		legs.add(new Bip9Limb(leftHip));
-		legs.add(new Bip9Limb(rightHip));
-		
-		
+		arms.add(new Bip9Limb(leftShoulder, leftLowerArm, armEEOffset, false,
+				leftArmMap));
+		arms.add(new Bip9Limb(rightShoulder, rightLowerArm, armEEOffset, false,
+				rightArmMap));
+
+		legs.add(new Bip9Limb(leftHip, leftLowerLeg, legEEOffset, true,
+				leftLegMap));
+		legs.add(new Bip9Limb(rightHip, rightLowerLeg, legEEOffset, true,
+				rightLegMap));
+
 		// setGroupIndex(-1);
 	}
 
@@ -316,31 +339,92 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 
 	public class Bip9Limb implements Limb {
 		protected RevoluteJoint hip;
+		protected Body endEffector;
+		protected Vec2 eeOffset;
+		protected boolean posAngle;
 
-		private Bip9Limb(RevoluteJoint hip){
+		protected HashMap<RevoluteJoint, Integer> jointMap;
+
+		protected float l1, l2;// lengths of link1 and link2
+
+		/**
+		 * Construct a new leg
+		 * 
+		 * @param hip
+		 *            hip joint
+		 * @param endEffector
+		 *            link to be used as the end effector
+		 * @param eeOffset
+		 *            where on the link we are controlling
+		 * @param posAngle
+		 *            true when the desired angle must be positive, does the
+		 *            knee bend only one way?
+		 * @param jointMap
+		 *            map of joint to indeces in the joint array
+		 */
+		private Bip9Limb(RevoluteJoint hip, Body endEffector, Vec2 eeOffset,
+				boolean posAngle, HashMap<RevoluteJoint, Integer> jointMap) {
 			this.hip = hip;
+			this.endEffector = endEffector;
+			this.eeOffset = eeOffset;
+			this.posAngle = posAngle;
+
+			l1 = hip.getAnchor2()
+					.sub(PhysicsUtils.getChildJoint(hip).getAnchor1()).length();
+
+			l2 = PhysicsUtils.getChildJoint(hip).m_localAnchor2.sub(eeOffset)
+					.length();
 		}
-		
+
 		@Override
 		public RevoluteJoint getBase() {
-			// TODO Auto-generated method stub
-			return null;
+			return hip;
 		}
 
 		@Override
 		public void addGravityCompenstaionTorques(
 				List<VirtualForce> virtualForces) {
-			// TODO Auto-generated method stub
+
 			RevoluteJoint curr = hip;
 			Body b;
 			Vec2 zero = new Vec2(0f, 0f);
 			while (curr != null) {
 				b = curr.getBody2();
-				virtualForces.add(new VirtualForce(hip, b, zero, 
-						world.getGravity().mul(-b.getMass())));
+				virtualForces.add(new VirtualForce(hip, b, zero, world
+						.getGravity().mul(-b.getMass())));
 				curr = PhysicsUtils.getChildJoint(curr);
 			}
 		}
+
+		private float maxLength = .99f;
+
+		@Override
+		public void setDesiredPose(Vec2 eepos, float[] desiredPose) {
+			// time to get my IK on
+			Vec2 relVec = eepos.sub(hip.getAnchor2());
+			if (relVec.length() > (l1 + l2) * maxLength) {
+				relVec.normalize();
+				relVec.mul((l1 + l2) * maxLength);
+			}
+
+			float l3 = relVec.length();
+			float kneeAngle = (float) Math.acos(Math.min(
+					(l1 * l1 + l2 * l2 - l3 * l3) / (2 * l1 * l2), 1));
+
+			float hipAngle = (float) Math.asin(l2 * Math.sin(kneeAngle) / l1);
+			if (posAngle && kneeAngle < 0) {
+				kneeAngle *= -1;
+				hipAngle *= -1;
+			}
+
+			// now set the values:
+			//relative angle of the hip global angle - parent angle
+			float hipAngleParent = (float) (Math.atan2(relVec.y, relVec.x)
+					- hip.getBody1().getAngle() + hipAngle);
+			desiredPose[jointMap.get(hip)] = hipAngleParent;
+			desiredPose[jointMap.get(PhysicsUtils.getChildJoint(hip))] = kneeAngle;
+		}
+
 	}
 
 	@Override

@@ -40,6 +40,6 @@ public interface Character {
 	public interface Limb {
 		public RevoluteJoint getBase();
 		public void addGravityCompenstaionTorques(List<VirtualForce> virtualForces);
-		
+		public void setDesiredPose(Vec2 eepos, float[] desiredPose);
 	}
 }
