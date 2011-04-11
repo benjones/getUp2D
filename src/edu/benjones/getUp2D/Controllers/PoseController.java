@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.jbox2d.dynamics.DebugDraw;
 import org.jbox2d.dynamics.World;
-import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 
 import edu.benjones.getUp2D.Character;

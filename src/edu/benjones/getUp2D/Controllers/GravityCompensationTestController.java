@@ -1,9 +1,6 @@
 package edu.benjones.getUp2D.Controllers;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.DebugDraw;
 import org.jbox2d.dynamics.World;
 
