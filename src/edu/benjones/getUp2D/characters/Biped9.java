@@ -47,7 +47,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 	protected ArrayList<Limb> legs;
 
 	protected ArrayList<ControlParam> defaultControlParams;
-	
+
 	protected World world;
 
 	public Biped9(World w) {
@@ -192,7 +192,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		kneeDef = new RevoluteJointDef();
 		kneeDef.initialize(leftUpperLeg, leftLowerLeg, leftUpperLeg
 				.getPosition().add(kneeUpperLegOffset));
-		kneeDef.lowerAngle = (float)(-.75f*Math.PI);
+		kneeDef.lowerAngle = (float) (-.75f * Math.PI);
 		kneeDef.upperAngle = 0f;
 		kneeDef.enableLimit = true;
 
@@ -259,12 +259,11 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		legs.add(new Bip9Limb(rightHip, rightLowerLeg, legEEOffset, true,
 				rightLegMap));
 
-		
 		defaultControlParams = new ArrayList<ControlParam>();
 		ControlParam hip, shoulder, knee, elbow;
-		hip = new ControlParam(30, 10);
+		hip = new ControlParam(35, 10);
 		shoulder = new ControlParam(25, 5);
-		knee = new ControlParam(25, 8);
+		knee = new ControlParam(30, 8);
 		elbow = new ControlParam(20, 2);
 		defaultControlParams.add(shoulder);
 		defaultControlParams.add(shoulder);
@@ -274,8 +273,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		defaultControlParams.add(hip);
 		defaultControlParams.add(knee);
 		defaultControlParams.add(knee);
-		
-		
+
 	}
 
 	public Body getRoot() {
@@ -299,7 +297,6 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		root.setAngularVelocity(0f);
 		root.setLinearVelocity(zero);
 
-		Vec2 pos;
 		float angle;
 		Body parent, child;
 		RevoluteJoint j;
@@ -427,30 +424,42 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 				relVec.mulLocal((l1 + l2) * maxLength);
 			}
 
-			System.out.println("relvec" + relVec);
-			
 			float l3 = relVec.length();
-			float det = Math.min(
-					(l1 * l1 + l2 * l2 - l3 * l3) / (2 * l1 * l2), 1.0f);
-			System.out.println("l1: " + l1 + " l2: " + l2 + " l3: " + l3 + " det: " + det);
-			float kneeAngle = (float)(Math.acos(det) - Math.PI);
-			System.out.println("knee angle: " + kneeAngle);
+			float det = Math.min((l1 * l1 + l2 * l2 - l3 * l3) / (2 * l1 * l2),
+					1.0f);
+
+			float kneePre = (float) Math.acos(det);
+			float kneeAngle = (float) (kneePre - Math.PI);
+
+			//angle between relVec and the desired link1
+			float theta1 = (float) Math.asin(l2*Math.sin(kneePre)/l3);
+			//global angle of relVec
+			float thetav = (float) Math.atan2(relVec.y, relVec.x);
+			//angle of parent
+			float thetap = hip.getBody1().getAngle();
 			
-			float hipAngle = (float) Math.asin(l2 * Math.sin(kneeAngle) / l1);
-			if (posAngle && kneeAngle < 0) {
-				//kneeAngle *= -1;
-				hipAngle *= -1;
-			}
-			System.out.println("hip angle: " + hipAngle);
-			// now set the values:
-			//relative angle of the hip global angle - parent angle
-			float hipAngleParent = hipAngle;//(float) (Math.atan2(relVec.y, relVec.x)
-					//- hip.getBody1().getAngle() + hipAngle);
-			System.out.println("hipAngleParent:" + hipAngleParent + " kneeAngle: " + kneeAngle);
-			desiredPose[jointMap.get(hip)] = hipAngleParent;
+			System.out.println("kneePre: " + kneePre + " theta1: " + theta1 + " kneePre + theta1: " + (kneePre + theta1));
+			float hipAngle = (float) (Math.PI + thetap + thetav + theta1);
+				//(float) Math.atan2(relVec.y, relVec.x);
+			
+			/*float theta2 = kneeAngle;//(float) (Math.PI - kneeAngle);
+			float hipAngle = (float) Math.atan2(relVec.y * (l2 + l1 * Math.cos(theta2))
+					- relVec.x * (l1 * Math.sin(theta2)),
+					relVec.x * (l2 + l1 * Math.cos(theta2)) + relVec.y * l1
+							* Math.sin(theta2));*/
+
+			//hipAngle -= hip.getBody1().getAngle();
+			/*
+			 * float hipAngle = (float) Math.asin(l2 * Math.sin(kneeAngle) /
+			 * l1); if (posAngle && kneeAngle < 0) { hipAngle *= -1; } // now
+			 * set the values: // relative angle of the hip global angle -
+			 * parent angle; hipAngle = (float) (Math.PI -(hipAngle -
+			 * (Math.atan2(relVec.y, relVec.x) - hip.getBody1().getAngle())));
+			 */
+
+			desiredPose[jointMap.get(hip)] = hipAngle;
 			desiredPose[jointMap.get(PhysicsUtils.getChildJoint(hip))] = kneeAngle;
 		}
-
 	}
 
 	@Override

@@ -2,7 +2,6 @@ package edu.benjones.getUp2D;
 
 import org.jbox2d.collision.AABB;
 import org.jbox2d.collision.shapes.PolygonDef;
-import org.jbox2d.common.Color3f;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
