@@ -189,8 +189,8 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		kneeDef = new RevoluteJointDef();
 		kneeDef.initialize(leftUpperLeg, leftLowerLeg, leftUpperLeg
 				.getPosition().add(kneeUpperLegOffset));
-		kneeDef.lowerAngle = 0f;
-		kneeDef.upperAngle = (float) Math.PI;
+		kneeDef.lowerAngle = (float)(-.75f*Math.PI);
+		kneeDef.upperAngle = 0f;
 		kneeDef.enableLimit = true;
 
 		leftKnee = (RevoluteJoint) w.createJoint(kneeDef);
@@ -397,7 +397,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			}
 		}
 
-		private float maxLength = .95f;
+		private float maxLength = .999f;
 
 		@Override
 		public void setDesiredPose(Vec2 eepos, float[] desiredPose) {
@@ -419,14 +419,14 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			
 			float hipAngle = (float) Math.asin(l2 * Math.sin(kneeAngle) / l1);
 			if (posAngle && kneeAngle < 0) {
-				kneeAngle *= -1;
+				//kneeAngle *= -1;
 				hipAngle *= -1;
 			}
-			System.out.println("knee angle: " + kneeAngle);
+			System.out.println("hip angle: " + hipAngle);
 			// now set the values:
 			//relative angle of the hip global angle - parent angle
-			float hipAngleParent = (float) (Math.atan2(relVec.y, relVec.x)
-					- hip.getBody1().getAngle() + hipAngle);
+			float hipAngleParent = hipAngle;//(float) (Math.atan2(relVec.y, relVec.x)
+					//- hip.getBody1().getAngle() + hipAngle);
 			System.out.println("hipAngleParent:" + hipAngleParent + " kneeAngle: " + kneeAngle);
 			desiredPose[jointMap.get(hip)] = hipAngleParent;
 			desiredPose[jointMap.get(PhysicsUtils.getChildJoint(hip))] = kneeAngle;

@@ -24,8 +24,8 @@ public class IKTestController extends PoseController {
 		// do Ik control
 		Limb leg = character.getLegs().get(0);
 		Vec2 hipPos = leg.getBase().getAnchor2();
-		ikPosition.set((float) (hipPos.x -  Math.abs(Math.sin(elapsed))),
-				(float) (hipPos.y - Math.abs(Math.sin(elapsed))));
+		ikPosition.set((float) (hipPos.x -  .5*Math.abs(Math.sin(elapsed))),
+				(float) (hipPos.y - .5*Math.abs(Math.sin(elapsed))));
 		leg.setDesiredPose(ikPosition, desiredPose);
 		super.computeTorques(w, dt);
 	}
