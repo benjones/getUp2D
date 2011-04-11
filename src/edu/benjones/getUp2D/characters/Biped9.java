@@ -408,11 +408,13 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 				relVec.mulLocal((l1 + l2) * maxLength);
 			}
 
+			System.out.println("relvec" + relVec);
+			
 			float l3 = relVec.length();
 			float det = Math.min(
 					(l1 * l1 + l2 * l2 - l3 * l3) / (2 * l1 * l2), 1.0f);
 			System.out.println("l1: " + l1 + " l2: " + l2 + " l3: " + l3 + " det: " + det);
-			float kneeAngle = (float)(Math.acos(det));
+			float kneeAngle = (float)(Math.acos(det) - Math.PI);
 			System.out.println("knee angle: " + kneeAngle);
 			
 			float hipAngle = (float) Math.asin(l2 * Math.sin(kneeAngle) / l1);
