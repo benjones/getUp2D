@@ -20,8 +20,8 @@ public class FixedBaseScenario extends GetUpScenario {
 	}
 	
 	public void setupController(){
-		controller = new IKTestController(character);
-		//controller = new GravityCompensationTestController(character);
+		//controller = new IKTestController(character);
+		controller = new GravityCompensationTestController(character);
 		//controller = new PoseControllerTestController(character);
 	}
 }

@@ -11,7 +11,7 @@ import edu.benjones.getUp2D.Character;
 import edu.benjones.getUp2D.Character.Limb;
 
 public class GravityCompensationTestController extends
-		PoseControllerTestController {
+		IKTestController {
 
 	protected ArrayList<VirtualForce> virtualForces;
 
@@ -40,6 +40,7 @@ public class GravityCompensationTestController extends
 	}
 
 	public void drawControllerExtras(DebugDraw g){
+		super.drawControllerExtras(g);
 		for (VirtualForce v : virtualForces)
 			v.draw(g);
 	}

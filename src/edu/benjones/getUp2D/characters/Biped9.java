@@ -18,6 +18,7 @@ import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
 import edu.benjones.getUp2D.Character;
+import edu.benjones.getUp2D.Controllers.ControlParam;
 import edu.benjones.getUp2D.Controllers.VirtualForce;
 import edu.benjones.getUp2D.Utils.PhysicsUtils;
 
@@ -45,6 +46,8 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 	protected ArrayList<Limb> arms;
 	protected ArrayList<Limb> legs;
 
+	protected ArrayList<ControlParam> defaultControlParams;
+	
 	protected World world;
 
 	public Biped9(World w) {
@@ -256,7 +259,23 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		legs.add(new Bip9Limb(rightHip, rightLowerLeg, legEEOffset, true,
 				rightLegMap));
 
-		// setGroupIndex(-1);
+		
+		defaultControlParams = new ArrayList<ControlParam>();
+		ControlParam hip, shoulder, knee, elbow;
+		hip = new ControlParam(30, 10);
+		shoulder = new ControlParam(25, 5);
+		knee = new ControlParam(25, 8);
+		elbow = new ControlParam(20, 2);
+		defaultControlParams.add(shoulder);
+		defaultControlParams.add(shoulder);
+		defaultControlParams.add(elbow);
+		defaultControlParams.add(elbow);
+		defaultControlParams.add(hip);
+		defaultControlParams.add(hip);
+		defaultControlParams.add(knee);
+		defaultControlParams.add(knee);
+		
+		
 	}
 
 	public Body getRoot() {
@@ -442,6 +461,11 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 	@Override
 	public List<Limb> getLegs() {
 		return legs;
+	}
+
+	@Override
+	public List<ControlParam> getDefaultControlParams() {
+		return defaultControlParams;
 	}
 
 }

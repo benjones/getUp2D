@@ -12,33 +12,17 @@ import edu.benjones.getUp2D.Utils.MathUtils;
 
 public class PoseController extends AbstractController {
 
-	public class ControlParam {
-		public float kp, kd;
-
-		private static final float defaultKP = 20, defaultKD = 2;
-
-		public ControlParam(float kp, float kd) {
-			this.kp = kp;
-			this.kd = kd;
-		}
-
-		public ControlParam() {
-			this.kp = defaultKP;
-			this.kd = defaultKD;
-		}
-
-	}
-
 	protected float[] desiredPose;
-	protected ControlParam[] controlParams;
+	protected List<ControlParam> controlParams;
 	protected float[] torques;
 
 	public PoseController(Character ch) {
 		super(ch);
 		desiredPose = new float[ch.getStateSize()];
-		controlParams = new ControlParam[ch.getStateSize()];
+		/*controlParams = new ControlParam[ch.getStateSize()];
 		for (int i = 0; i < controlParams.length; ++i)
-			controlParams[i] = new ControlParam();
+			controlParams[i] = new ControlParam();*/
+		controlParams = character.getDefaultControlParams();
 		torques = new float[ch.getStateSize()];
 	}
 
@@ -78,8 +62,8 @@ public class PoseController extends AbstractController {
 				j.getBody1().getAngle()));
 		
 		float velError = j.getJointSpeed();
-		torques[i] = controlParams[i].kp * angleError - velError
-				* controlParams[i].kd;
+		torques[i] = controlParams.get(i).kp * angleError - velError
+				* controlParams.get(i).kd;
 	}
 
 	public void clearTorques() {
