@@ -57,9 +57,16 @@ public class PoseController extends AbstractController {
 	 *            index of joint/torque/controlParam
 	 */
 	protected void computePDTorque(RevoluteJoint j, int i) {
-		float angleError = MathUtils.fixAngle(desiredPose[i] - (j.getBody2().getAngle() - 
-				j.getBody1().getAngle()));
+		float angleNow = (j.getBody2().getAngle() - 
+				j.getBody1().getAngle());
+		float angleError = MathUtils.fixAngle(desiredPose[i] - angleNow);
 		
+		//lowBroke?
+		//boolean lowBroke = angleNow + angleError < j.getLowerLimit();
+		boolean highBroke = angleNow + angleError > j.getUpperLimit();
+		if(highBroke){
+			angleError = MathUtils.fixAngle((float) (2*Math.PI - angleError));
+		}
 		float velError = j.getJointSpeed();
 		torques[i] = controlParams.get(i).kp * angleError - velError
 				* controlParams.get(i).kd;
