@@ -43,10 +43,10 @@ public class SupportPattern {
 		phase = 0;
 		hipHeight = new Trajectory1D();
 		shoulderHeight = new Trajectory1D();
-		
+
 		limbPatterns = new ArrayList<TreeMap<Float, supportInfo>>(
 				supportLabel.values().length);
-		
+
 		for (int i = 0; i < supportLabel.values().length; ++i) {
 			supportInfo empty = new supportInfo(limbStatus.idle, false, 0);
 			limbPatterns.add(new TreeMap<Float, supportInfo>());
@@ -95,50 +95,91 @@ public class SupportPattern {
 	public supportInfo getInfoNow(supportLabel limb) {
 		return getInfoAtTime(limb, phase);
 	}
-	
+
 	public float getSwingPhase(supportLabel limb) {
-		System.out.println("phase: " + phase);
 		supportInfo info = getInfoNow(limb);
-		if(info.ls != limbStatus.swing){
+		if (info.ls != limbStatus.swing) {
 			return 0;
 		}
-	
+
 		TreeMap<Float, supportInfo> map = limbPatterns.get(limb.ordinal());
 		Entry<Float, supportInfo> ent = map.floorEntry(phase);
-		//figure out when the swing started
+		// figure out when the swing started
 		float start = ent.getKey();
-		while(ent != null && ent.getValue().ls == limbStatus.swing){
-			System.out.println("start loop: " + ent);
+		while (ent != null && ent.getValue().ls == limbStatus.swing) {
 			start = ent.getKey();
 			ent = map.lowerEntry(ent.getKey());
 		}
-		System.out.println("start: " + start);
-		
+
 		ent = map.ceilingEntry(phase);
 		float end = ent.getKey();
-		while(ent != null && ent.getValue().ls == limbStatus.swing){
-			
+		while (ent != null && ent.getValue().ls == limbStatus.swing) {
+
 			ent = map.higherEntry(ent.getKey());
 			end = ent.getKey();
 		}
-		
-		System.out.println("end" + end);
-		
-		return (phase - start)/(end - start);
-		
-		
+
+		if (end == start)
+			return 0f;
+		return (phase - start) / (end - start);
+
 	}
 
-	public float getTimeToList(supportLabel limb) {
-		return 0;
+	public float getTimeToLift(supportLabel limb) {
+		supportInfo info = getInfoNow(limb);
+		if (info.ls != limbStatus.stance)
+			return 0;
+
+		TreeMap<Float, supportInfo> map = limbPatterns.get(limb.ordinal());
+		Entry<Float, supportInfo> ent = map.ceilingEntry(phase);
+		float end = ent.getKey();
+		while (ent != null && ent.getValue().ls == limbStatus.stance) {
+			ent = map.higherEntry(ent.getKey());
+			end = ent.getKey();
+		}
+		return end - phase;
 	}
 
 	public float getMinFiniteTime() {
-		return 0;
+		float ret = Float.POSITIVE_INFINITY;
+
+		Entry<Float, supportInfo> ent;
+		for (TreeMap<Float, supportInfo> map : limbPatterns) {
+			ent = map.firstEntry();
+			while (ent != null && ent.getKey() == Float.NEGATIVE_INFINITY)
+				ent = map.higherEntry(ent.getKey());
+			if (ent != null && ent.getKey() < ret)
+				ret = ent.getKey();
+		}
+		if (hipHeight.getMinT() < ret
+				&& hipHeight.getMinT() != Float.NEGATIVE_INFINITY)
+			ret = hipHeight.getMinT();
+		if (shoulderHeight.getMinT() < ret
+				&& shoulderHeight.getMinT() != Float.NEGATIVE_INFINITY)
+			ret = shoulderHeight.getMinT();
+
+		return ret;
 	}
 
 	public float getMaxFiniteTime() {
-		return 0;
+		float ret = Float.NEGATIVE_INFINITY;
+
+		Entry<Float, supportInfo> ent;
+		for (TreeMap<Float, supportInfo> map : limbPatterns) {
+			ent = map.lastEntry();
+			while (ent != null && ent.getKey() == Float.POSITIVE_INFINITY)
+				ent = map.lowerEntry(ent.getKey());
+			if (ent != null && ent.getKey() > ret)
+				ret = ent.getKey();
+		}
+		if (hipHeight.getMaxT() > ret
+				&& hipHeight.getMaxT() != Float.POSITIVE_INFINITY)
+			ret = hipHeight.getMaxT();
+		if (shoulderHeight.getMaxT() > ret
+				&& shoulderHeight.getMaxT() != Float.POSITIVE_INFINITY)
+			ret = shoulderHeight.getMaxT();
+
+		return ret;
 	}
 
 }

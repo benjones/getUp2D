@@ -40,10 +40,14 @@ public class Trajectory1D {
 	}
 
 	public float getMinT() {
+		if(data.size() == 0)
+			return Float.NEGATIVE_INFINITY;
 		return data.first().t;
 	}
 
 	public float getMaxT() {
+		if(data.size() == 0)
+			return Float.POSITIVE_INFINITY;
 		return data.last().t;
 	}
 
