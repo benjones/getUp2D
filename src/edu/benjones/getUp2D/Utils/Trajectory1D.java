@@ -2,7 +2,7 @@ package edu.benjones.getUp2D.Utils;
 
 import java.util.TreeSet;
 
-public class Trajectory {
+public class Trajectory1D {
 	public static class entry implements Comparable<Object> {
 		public float t;
 		public float val;
@@ -27,7 +27,7 @@ public class Trajectory {
 
 	private TreeSet<entry> data;
 
-	public Trajectory(){
+	public Trajectory1D(){
 		data = new TreeSet<entry>();
 	}
 	

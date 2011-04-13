@@ -6,18 +6,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.benjones.getUp2D.Utils.MathUtils;
-import edu.benjones.getUp2D.Utils.Trajectory;
+import edu.benjones.getUp2D.Utils.Trajectory1D;
 
 
-public class TrajectoryTest {
+public class Trajectory1DTest {
 
-	private Trajectory traj;
+	private Trajectory1D traj;
 	@Before
 	public void setupTrajectory(){
-		traj = new Trajectory();
-		traj.addKnot(new Trajectory.entry(0,1));
-		traj.addKnot(new Trajectory.entry(1,2));
-		traj.addKnot(new Trajectory.entry(2,3));
+		traj = new Trajectory1D();
+		traj.addKnot(new Trajectory1D.entry(0,1));
+		traj.addKnot(new Trajectory1D.entry(1,2));
+		traj.addKnot(new Trajectory1D.entry(2,3));
 	}
 	
 	@Test
