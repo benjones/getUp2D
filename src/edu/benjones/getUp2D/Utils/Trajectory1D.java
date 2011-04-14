@@ -1,5 +1,6 @@
 package edu.benjones.getUp2D.Utils;
 
+import java.util.Iterator;
 import java.util.TreeSet;
 
 public class Trajectory1D {
@@ -33,6 +34,10 @@ public class Trajectory1D {
 	
 	public void clear(){
 		data.clear();
+	}
+	
+	public int size(){
+		return data.size();
 	}
 	
 	public void addKnot(entry e) {
@@ -74,5 +79,28 @@ public class Trajectory1D {
 			return (a + (b - a) * t / (after.t - before.t));
 		}
 	}
+	
+	public float getMinVal(){
+		float ret = Float.POSITIVE_INFINITY;
+		for(Iterator<entry> it = data.iterator(); it.hasNext();){
+			entry e = (entry)it.next();
+			if(e.val < ret)
+				ret = e.val;
+		}
+		return ret;
+	}
 
+	public float getMaxVal(){
+		float ret = Float.NEGATIVE_INFINITY;
+		for(Iterator<entry> it = data.iterator(); it.hasNext();){
+			entry e = (entry)it.next();
+			if(e.val > ret)
+				ret = e.val;
+		}
+		return ret;
+	}
+	
+	public Iterator<entry> getIterator(){
+		return data.iterator();
+	}
 }

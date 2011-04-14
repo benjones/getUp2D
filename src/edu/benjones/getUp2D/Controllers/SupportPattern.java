@@ -1,9 +1,15 @@
 package edu.benjones.getUp2D.Controllers;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import org.jbox2d.common.Color3f;
+import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.DebugDraw;
+
+import edu.benjones.getUp2D.GetUpScenario;
 import edu.benjones.getUp2D.Utils.Trajectory1D;
 
 public class SupportPattern {
@@ -182,4 +188,170 @@ public class SupportPattern {
 		return ret;
 	}
 
+	private static final Color3f[] stripeColors = {
+			new Color3f(130f, 0f, 130f), new Color3f(0f, 130f, 0f),
+			new Color3f(0f, 0f, 130f) };
+
+	private static final Color3f hipHeightColor = Color3f.RED;
+	private static final Color3f shoulderHeightColor = new Color3f(130,130,255);
+
+	public void draw(DebugDraw g) {
+		g.setCamera(0, 0, 400);
+
+		float minFinite, maxFinite;
+		minFinite = Math.min(0, getMinFiniteTime());
+		maxFinite = Math.max(1, getMaxFiniteTime() + 1);
+
+		float boxWidth = 1.0f, boxHeight = .4f, boxLeftX = -.95f, boxBotY = .5f;
+
+		// reuse this for drawing all boxes
+		Vec2[] box = { new Vec2(boxLeftX, boxBotY),
+				new Vec2(boxLeftX, boxBotY + boxHeight),
+				new Vec2(boxLeftX + boxWidth, boxBotY + boxHeight),
+				new Vec2(boxLeftX + boxWidth, boxBotY) };
+
+		g.drawSolidPolygon(box, 4, Color3f.WHITE);
+
+		float eachBox = boxHeight / supportLabel.values().length;
+		float boxBegin;
+		Float boxEnd;
+		TreeMap<Float, supportInfo> map;
+		for (supportLabel i : supportLabel.values()) {
+			// setup heights
+			box[0].y = (float) (boxBotY + (i.ordinal() + .05) * eachBox);
+			box[1].y = (float) (boxBotY + (i.ordinal() + .95) * eachBox);
+			box[2].y = (float) (boxBotY + (i.ordinal() + .95) * eachBox);
+			box[3].y = (float) (boxBotY + (i.ordinal() + .05) * eachBox);
+			map = limbPatterns.get(i.ordinal());
+			boxBegin = minFinite;
+			boxEnd = map.higherKey(minFinite);
+			while (boxEnd != null && boxEnd < Float.POSITIVE_INFINITY) {
+				box[0].x = (float) (boxLeftX + (boxBegin - minFinite)
+						* boxWidth / (maxFinite - minFinite));
+				box[1].x = (float) (boxLeftX + (boxBegin - minFinite)
+						* boxWidth / (maxFinite - minFinite));
+				box[2].x = (float) (boxLeftX + (boxEnd - minFinite) * boxWidth
+						/ (maxFinite - minFinite));
+				box[3].x = (float) (boxLeftX + (boxEnd - minFinite) * boxWidth
+						/ (maxFinite - minFinite));
+
+				g.drawSolidPolygon(box, 4,
+						stripeColors[getInfoAtTime(i, boxBegin).ls.ordinal()]);
+
+				boxBegin = boxEnd;
+				boxEnd = map.higherKey(boxEnd);
+			}
+			// draw the last box
+			box[0].x = (float) (boxLeftX + (boxBegin - minFinite) * boxWidth
+					/ (maxFinite - minFinite));
+			box[1].x = (float) (boxLeftX + (boxBegin - minFinite) * boxWidth
+					/ (maxFinite - minFinite));
+			box[2].x = (float) (boxLeftX + boxWidth);
+			box[3].x = (float) (boxLeftX + boxWidth);
+
+			g.drawSolidPolygon(box, 4,
+					stripeColors[getInfoAtTime(i, boxBegin).ls.ordinal()]);
+
+		}
+
+		// draw the hip/shoulder height trajectories
+		float minHeight = 0, maxHeight = Math.max(hipHeight.getMaxVal(),
+				shoulderHeight.getMaxVal());
+
+		if (hipHeight.size() != 0) {
+			Vec2 lineStart = new Vec2(0, 0);
+			Vec2 lineEnd = new Vec2(0, 0);
+			if (hipHeight.size() == 1) {
+				lineStart.x = boxLeftX;
+				lineStart.y = boxBotY
+						+ (hipHeight.evaluateLinear(minFinite) - minHeight)
+						* boxHeight / (maxHeight - minHeight);
+				lineEnd.x = boxLeftX + boxWidth;
+				lineEnd.y = lineStart.y;
+				g.drawSegment(lineStart, lineEnd, hipHeightColor);
+			} else {
+				Iterator<Trajectory1D.entry> it = hipHeight.getIterator();
+				Trajectory1D.entry e;
+				lineStart.x = boxLeftX;
+				lineStart.y = boxBotY + boxHeight
+						* (hipHeight.evaluateLinear(minFinite) - minHeight)
+						/ (maxHeight - minHeight);
+				while (it.hasNext()) {
+					e = it.next();
+					if (e.t < minFinite)
+						continue;
+					if (e.t > maxFinite)
+						break;
+					lineEnd.x = boxLeftX + boxWidth * (e.t - minFinite)
+							/ (maxFinite - minFinite);
+					lineEnd.y = boxBotY + boxHeight * (e.val - minHeight)
+							/ (maxHeight - minHeight);
+					g.drawSegment(lineStart, lineEnd, hipHeightColor);
+					lineStart.x = lineEnd.x;
+					lineStart.y = lineEnd.y;
+				}
+				// draw the end part
+				lineEnd.x = boxLeftX + boxWidth;
+				lineEnd.y = boxBotY + boxHeight
+						* (hipHeight.evaluateLinear(maxFinite) - minHeight)
+						/ (maxHeight - minHeight);
+				g.drawSegment(lineStart, lineEnd, hipHeightColor);
+			}
+		}
+		
+		if (shoulderHeight.size() != 0) {
+			Vec2 lineStart = new Vec2(0, 0);
+			Vec2 lineEnd = new Vec2(0, 0);
+			if (shoulderHeight.size() == 1) {
+				lineStart.x = boxLeftX;
+				lineStart.y = boxBotY
+						+ (shoulderHeight.evaluateLinear(minFinite) - minHeight)
+						* boxHeight / (maxHeight - minHeight);
+				lineEnd.x = boxLeftX + boxWidth;
+				lineEnd.y = lineStart.y;
+				g.drawSegment(lineStart, lineEnd, shoulderHeightColor);
+			} else {
+				Iterator<Trajectory1D.entry> it = shoulderHeight.getIterator();
+				Trajectory1D.entry e;
+				lineStart.x = boxLeftX;
+				lineStart.y = boxBotY + boxHeight
+						* (shoulderHeight.evaluateLinear(minFinite) - minHeight)
+						/ (maxHeight - minHeight);
+				while (it.hasNext()) {
+					e = it.next();
+					if (e.t < minFinite)
+						continue;
+					if (e.t > maxFinite)
+						break;
+					lineEnd.x = boxLeftX + boxWidth * (e.t - minFinite)
+							/ (maxFinite - minFinite);
+					lineEnd.y = boxBotY + boxHeight * (e.val - minHeight)
+							/ (maxHeight - minHeight);
+					g.drawSegment(lineStart, lineEnd, shoulderHeightColor);
+					lineStart.x = lineEnd.x;
+					lineStart.y = lineEnd.y;
+				}
+				// draw the end part
+				lineEnd.x = boxLeftX + boxWidth;
+				lineEnd.y = boxBotY + boxHeight
+						* (shoulderHeight.evaluateLinear(maxFinite) - minHeight)
+						/ (maxHeight - minHeight);
+				g.drawSegment(lineStart, lineEnd, shoulderHeightColor);
+			}
+		}
+		
+		
+		//finally draw phase
+		
+		g.drawSegment(new Vec2(boxLeftX + (phase - minFinite)/(maxFinite - minFinite), boxBotY),
+				new Vec2(boxLeftX + (phase - minFinite)/(maxFinite - minFinite), boxBotY + boxHeight),
+				Color3f.WHITE);
+		
+
+		// return the camera to where it was
+		g.setCamera(GetUpScenario.defaultCameraParams.x,
+				GetUpScenario.defaultCameraParams.y,
+				GetUpScenario.defaultCameraParams.scale);
+
+	}
 }

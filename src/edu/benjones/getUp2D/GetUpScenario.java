@@ -13,6 +13,13 @@ import edu.benjones.getUp2D.Controllers.PoseController;
 import edu.benjones.getUp2D.characters.Biped9;
 
 public class GetUpScenario {
+
+	public static final class defaultCameraParams {
+		public final static float x = 0f;
+		public final static float y = 0f;
+		public final static float scale = 150f;
+	}
+
 	public DebugDraw debugDraw;
 
 	protected World world;
@@ -31,7 +38,7 @@ public class GetUpScenario {
 	private boolean desiredPoseSetup;
 
 	public GetUpScenario(DebugDraw g) {
-		drawDesiredPose = true;//false;
+		drawDesiredPose = true;// false;
 		desiredPoseSetup = false;
 		drawControllerExtras = true;
 		debugDraw = g;
@@ -50,7 +57,8 @@ public class GetUpScenario {
 		world.setDebugDraw(debugDraw);
 		setDrawContactPoints(false);
 
-		debugDraw.setCamera(0f, 0f, 150f);
+		debugDraw.setCamera(defaultCameraParams.x, defaultCameraParams.y,
+				defaultCameraParams.scale);
 
 		// setup ground
 		PolygonDef sd = new PolygonDef();
@@ -85,26 +93,27 @@ public class GetUpScenario {
 		debugDraw.appendFlags(DebugDraw.e_shapeBit);
 		debugDraw.appendFlags(DebugDraw.e_jointBit);
 
-		//rolling my own clear forces:
-		for(Body b = world.getBodyList(); b != null; b = b.getNext()){
+		// rolling my own clear forces:
+		for (Body b = world.getBodyList(); b != null; b = b.getNext()) {
 			b.m_force.setZero();
 			b.m_torque = 0f;
 		}
-		float timestep = (float) (1.0 / framerate)*.25f;
-		//drawing gets done here I guess?
-		controller.computeTorques(world,timestep);
+		float timestep = (float) (1.0 / framerate) * .25f;
+		// drawing gets done here I guess?
+		controller.computeTorques(world, timestep);
 		world.step(timestep, iterationCount);
 
 		if (drawDesiredPose) {
 			if (!desiredPoseSetup)
 				setupDesiredPoseCharacter();
-			float [] desiredPose = ((PoseController)controller).getDesiredPose();
+			float[] desiredPose = ((PoseController) controller)
+					.getDesiredPose();
 			desiredPoseCharacter.setState(character.getRoot().getPosition()
 					.add(new Vec2(-.5f, .5f)), character.getRoot().getAngle(),
 					desiredPose);
 		}
 
-		if(drawControllerExtras){
+		if (drawControllerExtras) {
 			controller.drawControllerExtras(debugDraw);
 		}
 		// debugDraw.drawString(5, 12, "test", new Color3f(255f, 255f, 255f));
