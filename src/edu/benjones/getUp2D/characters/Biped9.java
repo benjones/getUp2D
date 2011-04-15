@@ -445,6 +445,17 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			desiredPose[jointMap.get(hip)] = hipAngle;
 			desiredPose[jointMap.get(PhysicsUtils.getChildJoint(hip))] = kneeAngle;
 		}
+		public List<Body> getBodies(){
+			ArrayList<Body> bodies = new ArrayList<Body>();
+			
+			RevoluteJoint j = hip;
+			while(j != null){
+				bodies.add(j.getBody2());
+				j = PhysicsUtils.getChildJoint(j);
+			}
+			
+			return bodies;
+		}
 	}
 
 	@Override

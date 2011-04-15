@@ -1,18 +1,26 @@
 package edu.benjones.getUp2D;
 
+import java.util.HashMap;
+
 import org.jbox2d.collision.AABB;
+import org.jbox2d.collision.ContactID;
 import org.jbox2d.collision.shapes.PolygonDef;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
+import org.jbox2d.dynamics.ContactListener;
 import org.jbox2d.dynamics.DebugDraw;
 import org.jbox2d.dynamics.World;
+import org.jbox2d.dynamics.contacts.ContactPoint;
+import org.jbox2d.dynamics.contacts.ContactResult;
 
 import edu.benjones.getUp2D.Controllers.Controller;
 import edu.benjones.getUp2D.Controllers.PoseController;
 import edu.benjones.getUp2D.characters.Biped9;
 
 public class GetUpScenario {
+
+	protected static HashMap<ContactID, ContactResult> contactMap;
 
 	public static final class defaultCameraParams {
 		public final static float x = 0f;
@@ -38,6 +46,14 @@ public class GetUpScenario {
 	private boolean desiredPoseSetup;
 
 	public GetUpScenario(DebugDraw g) {
+
+		if (contactMap == null)
+			contactMap = new HashMap<ContactID, ContactResult>();
+		else {
+			System.out
+					.println("WARNING: contactMap already exists.  Hope you know what you're doing");
+		}
+
 		drawDesiredPose = true;// false;
 		desiredPoseSetup = false;
 		drawControllerExtras = true;
@@ -69,6 +85,22 @@ public class GetUpScenario {
 		Body ground = world.createBody(bd);
 		ground.createShape(sd);
 
+		// setup contactListener
+		world.setContactListener(new ContactListener() {
+			public void add(ContactPoint point) {
+			}
+
+			public void persist(ContactPoint point) {
+			}
+
+			public void remove(ContactPoint point) {
+			}
+
+			public void result(ContactResult point) {
+				contactMap.put(point.id, point);
+			}
+		});
+
 	}
 
 	public void setupCharacter() {
@@ -87,6 +119,7 @@ public class GetUpScenario {
 	}
 
 	public void step() {
+
 		debugDraw.setFlags(0);
 		// debugDraw.appendFlags(DebugDraw.e_aabbBit);
 		// debugDraw.appendFlags(DebugDraw.e_coreShapeBit);
@@ -101,6 +134,10 @@ public class GetUpScenario {
 		float timestep = (float) (1.0 / framerate) * .25f;
 		// drawing gets done here I guess?
 		controller.computeTorques(world, timestep);
+
+		// empty it, the refill it next frame
+		contactMap.clear();
+
 		world.step(timestep, iterationCount);
 
 		if (drawDesiredPose) {
@@ -142,6 +179,10 @@ public class GetUpScenario {
 
 	public boolean isDrawControllerExtras() {
 		return drawControllerExtras;
+	}
+
+	public static HashMap<ContactID, ContactResult> getContactMap() {
+		return contactMap;
 	}
 
 }

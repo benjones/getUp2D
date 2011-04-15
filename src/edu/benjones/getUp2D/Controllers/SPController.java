@@ -9,22 +9,21 @@ import edu.benjones.getUp2D.Controllers.SupportPatterns.SupportPatternGenerator;
 public class SPController extends PoseController {
 
 	private SupportPattern sp;
-	
+
 	public SPController(Character ch, SupportPatternGenerator g) {
 		super(ch);
-		
+
 		sp = g.getPattern();
 	}
 
-	
 	@Override
-	public void computeTorques(World w, float dt){
+	public void computeTorques(World w, float dt) {
 		sp.advancePhase(dt);
 		super.computeTorques(w, dt);
 	}
-	
+
 	@Override
-	public void drawControllerExtras(DebugDraw g){
+	public void drawControllerExtras(DebugDraw g) {
 		super.drawControllerExtras(g);
 		sp.draw(g);
 	}

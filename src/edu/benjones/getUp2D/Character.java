@@ -40,5 +40,6 @@ public interface Character {
 		public RevoluteJoint getBase();
 		public void addGravityCompenstaionTorques(List<VirtualForce> virtualForces);
 		public void setDesiredPose(Vec2 eepos, float[] desiredPose);
+		public List<Body> getBodies();
 	}
 }
