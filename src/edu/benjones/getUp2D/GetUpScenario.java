@@ -4,7 +4,10 @@ import java.util.HashMap;
 
 import org.jbox2d.collision.AABB;
 import org.jbox2d.collision.ContactID;
+import org.jbox2d.collision.Segment;
 import org.jbox2d.collision.shapes.PolygonDef;
+import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.common.RaycastResult;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
@@ -30,7 +33,7 @@ public class GetUpScenario {
 
 	public DebugDraw debugDraw;
 
-	protected World world;
+	protected static World world;
 	protected Character character, desiredPoseCharacter;
 	protected Controller controller;
 	private AABB worldAABB;
@@ -44,6 +47,8 @@ public class GetUpScenario {
 	private boolean drawDesiredPose;
 	private boolean drawControllerExtras;
 	private boolean desiredPoseSetup;
+
+	private static Body ground;
 
 	public GetUpScenario(DebugDraw g) {
 
@@ -69,6 +74,8 @@ public class GetUpScenario {
 		worldAABB.upperBound.set(100, 100f);
 		Vec2 gravity = new Vec2(0f, -10f);
 		// skip sleeping, since there shouldn't be anything sleeping
+		if (world != null)
+			System.out.println("WARNING: World not null in createWorld");
 		world = new World(worldAABB, gravity, false);
 		world.setDebugDraw(debugDraw);
 		setDrawContactPoints(false);
@@ -82,7 +89,10 @@ public class GetUpScenario {
 
 		BodyDef bd = new BodyDef();
 		bd.position.set(0f, -5f);
-		Body ground = world.createBody(bd);
+		if (ground != null) {
+			System.out.println("WARNING: Ground is not null in createWorld");
+		}
+		ground = world.createBody(bd);
 		ground.createShape(sd);
 
 		// setup contactListener
@@ -183,6 +193,38 @@ public class GetUpScenario {
 
 	public static HashMap<ContactID, ContactResult> getContactMap() {
 		return contactMap;
+	}
+
+	/**
+	 * returns the height of the ground body at the specified x coordinate
+	 * 
+	 * @param x
+	 * @return height at x=x
+	 */
+	private static Segment testRay;
+	private static RaycastResult testRayResult;
+
+	// TODO TEST THIS METHOD!!!!
+	public static float getGroundHeightAt(float x) {
+		if (testRay == null) {
+			testRay.p1.y = 1000f;
+			testRay.p2.y = -1000f;
+			testRayResult = new RaycastResult();
+		}
+		testRay.p1.x = x;
+		testRay.p2.x = x;
+
+		Float ret = null;
+		for (Shape s = ground.getShapeList(); s != null; s = s.getNext()) {
+			s.testSegment(ground.getXForm(), testRayResult, testRay, 1f);
+			float y = (1 - testRayResult.lambda) * testRay.p1.y
+					+ testRayResult.lambda * testRay.p2.y;
+			if (ret == null || y > ret) {
+				ret = y;
+			}
+		}
+		return ret;
+
 	}
 
 }

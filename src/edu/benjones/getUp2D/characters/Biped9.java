@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.jbox2d.collision.ContactID;
 import org.jbox2d.collision.FilterData;
+import org.jbox2d.collision.Manifold;
 import org.jbox2d.collision.MassData;
 import org.jbox2d.collision.shapes.PolygonDef;
 import org.jbox2d.collision.shapes.Shape;
@@ -14,9 +16,14 @@ import org.jbox2d.common.XForm;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.World;
+import org.jbox2d.dynamics.contacts.Contact;
+import org.jbox2d.dynamics.contacts.ContactEdge;
+import org.jbox2d.dynamics.contacts.ContactResult;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
+
 import edu.benjones.getUp2D.Character;
+import edu.benjones.getUp2D.GetUpScenario;
 import edu.benjones.getUp2D.Controllers.ControlParam;
 import edu.benjones.getUp2D.Controllers.VirtualForce;
 import edu.benjones.getUp2D.Utils.PhysicsUtils;
@@ -121,8 +128,8 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		elbowDef = new RevoluteJointDef();
 		elbowDef.initialize(leftUpperArm, leftLowerArm, leftUpperArm
 				.getPosition().add(elbowUpperArmOffset));
-		elbowDef.lowerAngle = (float) (-.75*Math.PI);
-		elbowDef.upperAngle = (float) (.75*Math.PI);
+		elbowDef.lowerAngle = (float) (-.75 * Math.PI);
+		elbowDef.upperAngle = (float) (.75 * Math.PI);
 		elbowDef.enableLimit = true;
 
 		leftElbow = (RevoluteJoint) w.createJoint(elbowDef);
@@ -430,31 +437,88 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			float kneePre = (float) Math.acos(det);
 			float kneeAngle = (float) (kneePre - Math.PI);
 
-			//angle between relVec and the desired link1
-			float theta1 = (float) Math.asin(l2*Math.sin(kneePre)/l3);
-			//global angle of relVec
+			// angle between relVec and the desired link1
+			float theta1 = (float) Math.asin(l2 * Math.sin(kneePre) / l3);
+			// global angle of relVec
 			float thetav = (float) Math.atan2(relVec.y, relVec.x);
-			//angle of parent
+			// angle of parent
 			float thetap = hip.getBody1().getAngle();
-			
-			
+
 			float hipAngle = (float) (Math.PI + thetap + thetav + theta1);
-			if(!this.posAngle)
+			if (!this.posAngle)
 				hipAngle += Math.PI;
-			
+
 			desiredPose[jointMap.get(hip)] = hipAngle;
 			desiredPose[jointMap.get(PhysicsUtils.getChildJoint(hip))] = kneeAngle;
 		}
-		public List<Body> getBodies(){
-			ArrayList<Body> bodies = new ArrayList<Body>();
-			
-			RevoluteJoint j = hip;
-			while(j != null){
-				bodies.add(j.getBody2());
-				j = PhysicsUtils.getChildJoint(j);
+
+		private ArrayList<Body> bodies;
+
+		public List<Body> getBodies() {
+			if (bodies == null) {
+				bodies = new ArrayList<Body>();
+
+				RevoluteJoint j = hip;
+				while (j != null) {
+					bodies.add(j.getBody2());
+					j = PhysicsUtils.getChildJoint(j);
+				}
 			}
-			
 			return bodies;
+		}
+
+		// this looks TERRIBLE. I THINK, that all the loops will be 1-2 elements
+		// max
+		@Override
+		public float getNormalForceOnLeg(float dt) {
+			float force = 0f;
+			HashMap<ContactID, ContactResult> contactMap = GetUpScenario
+					.getContactMap();
+			for (Body b : getBodies()) {
+				for (ContactEdge e = b.getContactList(); e != null; e = e.next) {
+					Contact c = e.contact;
+					for (Manifold m : c.getManifolds()) {
+						for (int i = 0; i < m.pointCount; ++i) {
+							force += Math
+									.abs(contactMap.get(m.points[i].id).normalImpulse
+											/ dt);
+						}
+					}
+				}
+
+			}
+			return force;
+		}
+
+		@Override
+		public float getTangentialForceOnLeg(float dt) {
+			float force = 0f;
+			HashMap<ContactID, ContactResult> contactMap = GetUpScenario
+					.getContactMap();
+			for (Body b : getBodies()) {
+				for (ContactEdge e = b.getContactList(); e != null; e = e.next) {
+					Contact c = e.contact;
+					for (Manifold m : c.getManifolds()) {
+						for (int i = 0; i < m.pointCount; ++i) {
+							force += Math
+									.abs(contactMap.get(m.points[i].id).tangentImpulse
+											/ dt);
+						}
+					}
+				}
+
+			}
+			return force;
+		}
+
+		@Override
+		public Vec2 getEndEffectorPosition() {
+			return endEffector.getLocalPoint(eeOffset);
+		}
+
+		@Override
+		public void setDesiredPoseKneel(Vec2 kneePos, float[] desiredPose) {
+
 		}
 	}
 

@@ -14,6 +14,68 @@ import edu.benjones.getUp2D.Utils.Trajectory1D;
 
 public class SupportPattern {
 
+	public static class limbPattern {
+
+		protected TreeMap<Float, supportInfo> pattern;
+
+		public limbPattern() {
+			supportInfo empty = new supportInfo(limbStatus.idle, false, 0);
+			pattern = new TreeMap<Float, supportInfo>();
+			pattern.put(Float.NEGATIVE_INFINITY, empty);
+			pattern.put(Float.POSITIVE_INFINITY, empty);
+		}
+
+		public void put(float time, supportInfo info) {
+			pattern.put(time, info);
+		}
+
+		public supportInfo getInfoAtTime(float t) {
+			return pattern.floorEntry(t).getValue();
+		}
+
+		public float getSwingPhaseAtTime(float t) {
+			supportInfo info = getInfoAtTime(t);
+			if (info.ls != limbStatus.swing) {
+				return 0f;
+			}
+
+			Entry<Float, supportInfo> ent = pattern.floorEntry(t);
+			// figure out when the swing started
+			float start = ent.getKey();
+			while (ent != null && ent.getValue().ls == limbStatus.swing) {
+				start = ent.getKey();
+				ent = pattern.lowerEntry(ent.getKey());
+			}
+
+			ent = pattern.ceilingEntry(t);
+			float end = ent.getKey();
+			while (ent != null && ent.getValue().ls == limbStatus.swing) {
+
+				ent = pattern.higherEntry(ent.getKey());
+				end = ent.getKey();
+			}
+
+			if (end == start)
+				return 0f;
+			return (t - start) / (end - start);
+		}
+
+		public float getTimeToLiftAtTime(float t) {
+			supportInfo info = getInfoAtTime(t);
+			if (info.ls != limbStatus.stance)
+				return 0;
+
+			Entry<Float, supportInfo> ent = pattern.ceilingEntry(t);
+			float end = ent.getKey();
+			while (ent != null && ent.getValue().ls == limbStatus.stance) {
+				ent = pattern.higherEntry(ent.getKey());
+				end = ent.getKey();
+			}
+			return end - t;
+		}
+
+	}
+
 	public enum supportLabel {
 		leftArm, rightArm, leftLeg, rightLeg, butt
 	}
@@ -41,7 +103,7 @@ public class SupportPattern {
 
 	}
 
-	private ArrayList<TreeMap<Float, supportInfo>> limbPatterns;
+	private ArrayList<limbPattern> limbPatterns;
 	private Trajectory1D hipHeight, shoulderHeight;
 	private float phase;
 
@@ -50,14 +112,12 @@ public class SupportPattern {
 		hipHeight = new Trajectory1D();
 		shoulderHeight = new Trajectory1D();
 
-		limbPatterns = new ArrayList<TreeMap<Float, supportInfo>>(
-				supportLabel.values().length);
+		limbPatterns = new ArrayList<limbPattern>(supportLabel.values().length);
 
 		for (int i = 0; i < supportLabel.values().length; ++i) {
-			supportInfo empty = new supportInfo(limbStatus.idle, false, 0);
-			limbPatterns.add(new TreeMap<Float, supportInfo>());
-			limbPatterns.get(i).put(Float.NEGATIVE_INFINITY, empty);
-			limbPatterns.get(i).put(Float.POSITIVE_INFINITY, empty);
+
+			limbPatterns.add(new limbPattern());
+
 		}
 
 	}
@@ -95,7 +155,7 @@ public class SupportPattern {
 	}
 
 	public supportInfo getInfoAtTime(supportLabel limb, float t) {
-		return limbPatterns.get(limb.ordinal()).floorEntry(t).getValue();
+		return limbPatterns.get(limb.ordinal()).getInfoAtTime(t);
 	}
 
 	public supportInfo getInfoNow(supportLabel limb) {
@@ -103,54 +163,23 @@ public class SupportPattern {
 	}
 
 	public float getSwingPhase(supportLabel limb) {
-		supportInfo info = getInfoNow(limb);
-		if (info.ls != limbStatus.swing) {
-			return 0;
-		}
-
-		TreeMap<Float, supportInfo> map = limbPatterns.get(limb.ordinal());
-		Entry<Float, supportInfo> ent = map.floorEntry(phase);
-		// figure out when the swing started
-		float start = ent.getKey();
-		while (ent != null && ent.getValue().ls == limbStatus.swing) {
-			start = ent.getKey();
-			ent = map.lowerEntry(ent.getKey());
-		}
-
-		ent = map.ceilingEntry(phase);
-		float end = ent.getKey();
-		while (ent != null && ent.getValue().ls == limbStatus.swing) {
-
-			ent = map.higherEntry(ent.getKey());
-			end = ent.getKey();
-		}
-
-		if (end == start)
-			return 0f;
-		return (phase - start) / (end - start);
-
+		return limbPatterns.get(limb.ordinal()).getSwingPhaseAtTime(phase);
 	}
 
 	public float getTimeToLift(supportLabel limb) {
-		supportInfo info = getInfoNow(limb);
-		if (info.ls != limbStatus.stance)
-			return 0;
+		return limbPatterns.get(limb.ordinal()).getTimeToLiftAtTime(phase);
+	}
 
-		TreeMap<Float, supportInfo> map = limbPatterns.get(limb.ordinal());
-		Entry<Float, supportInfo> ent = map.ceilingEntry(phase);
-		float end = ent.getKey();
-		while (ent != null && ent.getValue().ls == limbStatus.stance) {
-			ent = map.higherEntry(ent.getKey());
-			end = ent.getKey();
-		}
-		return end - phase;
+	public float getPhase() {
+		return phase;
 	}
 
 	public float getMinFiniteTime() {
 		float ret = Float.POSITIVE_INFINITY;
 
 		Entry<Float, supportInfo> ent;
-		for (TreeMap<Float, supportInfo> map : limbPatterns) {
+		for (limbPattern pattern : limbPatterns) {
+			TreeMap<Float, supportInfo> map = pattern.pattern;
 			ent = map.firstEntry();
 			while (ent != null && ent.getKey() == Float.NEGATIVE_INFINITY)
 				ent = map.higherEntry(ent.getKey());
@@ -171,7 +200,8 @@ public class SupportPattern {
 		float ret = Float.NEGATIVE_INFINITY;
 
 		Entry<Float, supportInfo> ent;
-		for (TreeMap<Float, supportInfo> map : limbPatterns) {
+		for (limbPattern pattern : limbPatterns) {
+			TreeMap<Float, supportInfo> map = pattern.pattern;
 			ent = map.lastEntry();
 			while (ent != null && ent.getKey() == Float.POSITIVE_INFINITY)
 				ent = map.lowerEntry(ent.getKey());
@@ -193,7 +223,8 @@ public class SupportPattern {
 			new Color3f(0f, 0f, 130f) };
 
 	private static final Color3f hipHeightColor = Color3f.RED;
-	private static final Color3f shoulderHeightColor = new Color3f(130,130,255);
+	private static final Color3f shoulderHeightColor = new Color3f(130, 130,
+			255);
 
 	public void draw(DebugDraw g) {
 		g.setCamera(0, 0, 400);
@@ -222,7 +253,7 @@ public class SupportPattern {
 			box[1].y = (float) (boxBotY + (i.ordinal() + .95) * eachBox);
 			box[2].y = (float) (boxBotY + (i.ordinal() + .95) * eachBox);
 			box[3].y = (float) (boxBotY + (i.ordinal() + .05) * eachBox);
-			map = limbPatterns.get(i.ordinal());
+			map = limbPatterns.get(i.ordinal()).pattern;
 			boxBegin = minFinite;
 			boxEnd = map.higherKey(minFinite);
 			while (boxEnd != null && boxEnd < Float.POSITIVE_INFINITY) {
@@ -298,7 +329,7 @@ public class SupportPattern {
 				g.drawSegment(lineStart, lineEnd, hipHeightColor);
 			}
 		}
-		
+
 		if (shoulderHeight.size() != 0) {
 			Vec2 lineStart = new Vec2(0, 0);
 			Vec2 lineEnd = new Vec2(0, 0);
@@ -314,7 +345,8 @@ public class SupportPattern {
 				Iterator<Trajectory1D.entry> it = shoulderHeight.getIterator();
 				Trajectory1D.entry e;
 				lineStart.x = boxLeftX;
-				lineStart.y = boxBotY + boxHeight
+				lineStart.y = boxBotY
+						+ boxHeight
 						* (shoulderHeight.evaluateLinear(minFinite) - minHeight)
 						/ (maxHeight - minHeight);
 				while (it.hasNext()) {
@@ -333,20 +365,20 @@ public class SupportPattern {
 				}
 				// draw the end part
 				lineEnd.x = boxLeftX + boxWidth;
-				lineEnd.y = boxBotY + boxHeight
+				lineEnd.y = boxBotY
+						+ boxHeight
 						* (shoulderHeight.evaluateLinear(maxFinite) - minHeight)
 						/ (maxHeight - minHeight);
 				g.drawSegment(lineStart, lineEnd, shoulderHeightColor);
 			}
 		}
-		
-		
-		//finally draw phase
-		
-		g.drawSegment(new Vec2(boxLeftX + (phase - minFinite)/(maxFinite - minFinite), boxBotY),
-				new Vec2(boxLeftX + (phase - minFinite)/(maxFinite - minFinite), boxBotY + boxHeight),
-				Color3f.WHITE);
-		
+
+		// finally draw phase
+
+		g.drawSegment(new Vec2(boxLeftX + (phase - minFinite)
+				/ (maxFinite - minFinite), boxBotY), new Vec2(boxLeftX
+				+ (phase - minFinite) / (maxFinite - minFinite), boxBotY
+				+ boxHeight), Color3f.WHITE);
 
 		// return the camera to where it was
 		g.setCamera(GetUpScenario.defaultCameraParams.x,

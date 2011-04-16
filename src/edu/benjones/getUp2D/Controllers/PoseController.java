@@ -18,9 +18,10 @@ public class PoseController extends AbstractController {
 	public PoseController(Character ch) {
 		super(ch);
 		desiredPose = new float[ch.getStateSize()];
-		/*controlParams = new ControlParam[ch.getStateSize()];
-		for (int i = 0; i < controlParams.length; ++i)
-			controlParams[i] = new ControlParam();*/
+		/*
+		 * controlParams = new ControlParam[ch.getStateSize()]; for (int i = 0;
+		 * i < controlParams.length; ++i) controlParams[i] = new ControlParam();
+		 */
 		controlParams = character.getDefaultControlParams();
 		torques = new float[ch.getStateSize()];
 	}
@@ -57,15 +58,14 @@ public class PoseController extends AbstractController {
 	 *            index of joint/torque/controlParam
 	 */
 	protected void computePDTorque(RevoluteJoint j, int i) {
-		float angleNow = (j.getBody2().getAngle() - 
-				j.getBody1().getAngle());
+		float angleNow = (j.getBody2().getAngle() - j.getBody1().getAngle());
 		float angleError = MathUtils.fixAngle(desiredPose[i] - angleNow);
-		
-		//lowBroke?
-		//boolean lowBroke = angleNow + angleError < j.getLowerLimit();
+
+		// lowBroke?
+		// boolean lowBroke = angleNow + angleError < j.getLowerLimit();
 		boolean highBroke = angleNow + angleError > j.getUpperLimit();
-		if(highBroke){
-			angleError = MathUtils.fixAngle((float) (2*Math.PI - angleError));
+		if (highBroke) {
+			angleError = MathUtils.fixAngle((float) (2 * Math.PI - angleError));
 		}
 		float velError = j.getJointSpeed();
 		torques[i] = controlParams.get(i).kp * angleError - velError
@@ -83,6 +83,12 @@ public class PoseController extends AbstractController {
 
 	@Override
 	public void drawControllerExtras(DebugDraw g) {
-				
+
+	}
+
+	@Override
+	public void reset() {
+		// don't think there's anything to do here
+
 	}
 }
