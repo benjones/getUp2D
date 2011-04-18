@@ -28,30 +28,30 @@ public class Trajectory1D {
 
 	private TreeSet<entry> data;
 
-	public Trajectory1D(){
+	public Trajectory1D() {
 		data = new TreeSet<entry>();
 	}
-	
-	public void clear(){
+
+	public void clear() {
 		data.clear();
 	}
-	
-	public int size(){
+
+	public int size() {
 		return data.size();
 	}
-	
+
 	public void addKnot(entry e) {
 		data.add(e);
 	}
 
 	public float getMinT() {
-		if(data.size() == 0)
+		if (data.size() == 0)
 			return Float.NEGATIVE_INFINITY;
 		return data.first().t;
 	}
 
 	public float getMaxT() {
-		if(data.size() == 0)
+		if (data.size() == 0)
 			return Float.POSITIVE_INFINITY;
 		return data.last().t;
 	}
@@ -72,35 +72,35 @@ public class Trajectory1D {
 				return before.val;
 			if (MathUtils.floatEquals(before.t, t))
 				return before.val;
-			if(MathUtils.floatEquals(after.t, t))
+			if (MathUtils.floatEquals(after.t, t))
 				return after.val;
 			float a = before.val;
 			float b = after.val;
-			return (a + (b - a) * t / (after.t - before.t));
+			return (a + (b - a) * (t - before.t) / (after.t - before.t));
 		}
 	}
-	
-	public float getMinVal(){
+
+	public float getMinVal() {
 		float ret = Float.POSITIVE_INFINITY;
-		for(Iterator<entry> it = data.iterator(); it.hasNext();){
-			entry e = (entry)it.next();
-			if(e.val < ret)
+		for (Iterator<entry> it = data.iterator(); it.hasNext();) {
+			entry e = (entry) it.next();
+			if (e.val < ret)
 				ret = e.val;
 		}
 		return ret;
 	}
 
-	public float getMaxVal(){
+	public float getMaxVal() {
 		float ret = Float.NEGATIVE_INFINITY;
-		for(Iterator<entry> it = data.iterator(); it.hasNext();){
-			entry e = (entry)it.next();
-			if(e.val > ret)
+		for (Iterator<entry> it = data.iterator(); it.hasNext();) {
+			entry e = (entry) it.next();
+			if (e.val > ret)
 				ret = e.val;
 		}
 		return ret;
 	}
-	
-	public Iterator<entry> getIterator(){
+
+	public Iterator<entry> getIterator() {
 		return data.iterator();
 	}
 }
