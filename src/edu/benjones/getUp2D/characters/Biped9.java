@@ -7,7 +7,6 @@ import java.util.List;
 import org.jbox2d.collision.ContactID;
 import org.jbox2d.collision.FilterData;
 import org.jbox2d.collision.Manifold;
-import org.jbox2d.collision.MassData;
 import org.jbox2d.collision.shapes.PolygonDef;
 import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Mat22;
@@ -67,9 +66,9 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		kneeUpperLegOffset = new Vec2(0f, -.15f);
 		kneeLowerLegOffset = new Vec2(0f, .13f);
 		elbowUpperArmOffset = new Vec2(0f, .12f);
-		elbowLowerArmOffset = new Vec2(0f, -.09f);
+		elbowLowerArmOffset = new Vec2(0f, -.11f);
 		legEEOffset = new Vec2(0f, -.16f);
-		armEEOffset = new Vec2(0f, .11f);
+		armEEOffset = new Vec2(0f, .13f);
 
 		BodyDef rootDef = new BodyDef();
 		rootDef.position = new Vec2(0f, 0f);
@@ -117,7 +116,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 				.add(elbowUpperArmOffset).sub(elbowLowerArmOffset);
 
 		lowerArmPolyDef = new PolygonDef();
-		lowerArmPolyDef.setAsBox(.05f, .11f);
+		lowerArmPolyDef.setAsBox(.05f, .13f);
 		lowerArmPolyDef.density = limbDensity;
 		lowerArmPolyDef.filter.groupIndex = filterGroup;
 
@@ -357,7 +356,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 	public static Character getStaticCharacter(World w) {
 		Character ret = makeCharacter(w);
 		for (Body b : ret.getBodies())
-			b.setMass(new MassData());
+			;// b.setMass(new MassData());
 		return ret;
 	}
 
@@ -446,7 +445,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			// angle of parent
 			float thetap = hip.getBody1().getAngle();
 
-			float hipAngle = (float) (Math.PI * .5 + thetap + thetav + theta1);
+			float hipAngle = (float) (Math.PI * 1.5 + thetap + thetav + theta1);
 			if (!this.posAngle)
 				hipAngle += Math.PI;
 

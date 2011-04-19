@@ -174,8 +174,12 @@ public class GetUpScenario {
 		if (drawDesiredPose) {
 			if (!desiredPoseSetup)
 				setupDesiredPoseCharacter();
-			float[] desiredPose = ((PoseController) controller)
-					.getDesiredPose();
+			float[] desiredPose =
+			/*
+			 * new float[desiredPoseCharacter.getStateSize()]; for (int i = 0; i
+			 * < desiredPose.length; ++i) { desiredPose[i] = 0f; }
+			 */
+			((PoseController) controller).getDesiredPose();
 
 			desiredPoseCharacter.setState(character.getRoot().getPosition()
 					.add(new Vec2(-1f, 1f)), character.getRoot().getAngle(),

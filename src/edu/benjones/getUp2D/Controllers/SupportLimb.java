@@ -121,9 +121,10 @@ public class SupportLimb {
 		// check for contacts
 		boolean contact = false;
 		for (Body b : limb.getBodies()) {
-			if (b.m_contactList != null)
+			if (b.m_contactList != null) {
 				contact = true;
-			break;
+				break;
+			}
 		}
 		if (contact)
 			plantedLevel = 1.0f;

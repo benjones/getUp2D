@@ -21,7 +21,7 @@ public class SPController extends PoseController {
 	private ArrayList<ControlParam> originalControlParams;
 
 	// scale "idle" limb torques by this much
-	private float idleModifier = .1f;
+	private float idleModifier = 1.0f;// .1f;
 
 	public SPController(Character ch, SupportPatternGenerator g) {
 		super(ch);
@@ -53,10 +53,13 @@ public class SPController extends PoseController {
 			if (now.ls != later.ls) {
 				if (later.ls == limbStatus.stance
 						&& !limbs[limb.ordinal()].canSupport()) {
+					System.out.println("limb " + limb + " can't support");
 					advance = false;
 				}
 				if (now.ls == limbStatus.stance
 						&& !limbs[limb.ordinal()].canRemoveSupport(dt)) {
+					System.out.println("limbs " + limb
+							+ " can't remove support");
 					advance = false;
 				}
 			}
