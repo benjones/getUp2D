@@ -77,7 +77,8 @@ public class SupportPattern {
 	}
 
 	public enum supportLabel {
-		leftArm, rightArm, leftLeg, rightLeg, butt
+		leftArm, rightArm, leftLeg, rightLeg
+		// , butt
 	}
 
 	public enum limbStatus {
@@ -120,6 +121,10 @@ public class SupportPattern {
 
 		}
 
+	}
+
+	public limbPattern getPattern(supportLabel label) {
+		return limbPatterns.get(label.ordinal());
 	}
 
 	public void addLimbStatus(supportLabel limb, float time, supportInfo info) {
@@ -385,5 +390,9 @@ public class SupportPattern {
 				GetUpScenario.defaultCameraParams.y,
 				GetUpScenario.defaultCameraParams.scale);
 
+	}
+
+	public void reset() {
+		phase = 0;
 	}
 }

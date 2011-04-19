@@ -311,12 +311,17 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			j = joints.get(i);
 			parent = j.getBody1();
 			child = j.getBody2();
+			if (parent == root) {
+				System.out
+						.println("parent's orientation: " + parent.getAngle());
+			}
 			angle = parent.getAngle() + relativeOrientations[i];
 			xf.R = Mat22.createRotationalTransform(angle);
 			position = j.getAnchor1().sub(XForm.mul(xf, j.m_localAnchor2));
 			child.setXForm(position, angle);
 			child.setAngularVelocity(0f);
 			child.setLinearVelocity(zero);
+
 		}
 
 	}
@@ -513,12 +518,17 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 
 		@Override
 		public Vec2 getEndEffectorPosition() {
-			return endEffector.getLocalPoint(eeOffset);
+			return endEffector.getWorldLocation(eeOffset);
 		}
 
 		@Override
 		public void setDesiredPoseKneel(Vec2 kneePos, float[] desiredPose) {
 
+		}
+
+		@Override
+		public HashMap<RevoluteJoint, Integer> getJointMap() {
+			return jointMap;
 		}
 	}
 

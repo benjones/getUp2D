@@ -1,5 +1,6 @@
 package edu.benjones.getUp2D;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.jbox2d.common.Vec2;
@@ -54,6 +55,8 @@ public interface Character {
 
 		public void addGravityCompenstaionTorques(
 				List<VirtualForce> virtualForces);
+
+		public HashMap<RevoluteJoint, Integer> getJointMap();
 
 		public void setDesiredPose(Vec2 eepos, float[] desiredPose);
 

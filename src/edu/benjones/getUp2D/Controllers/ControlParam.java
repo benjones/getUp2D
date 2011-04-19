@@ -15,4 +15,18 @@ public class ControlParam {
 		this.kd = defaultKD;
 	}
 
+	public ControlParam(ControlParam other) {
+		this.kp = other.kp;
+		this.kd = other.kd;
+	}
+
+	public void setFrom(ControlParam other) {
+		this.kp = other.kp;
+		this.kd = other.kd;
+	}
+
+	public void scale(float alpha) {
+		this.kp *= alpha;
+		this.kd *= alpha;
+	}
 }

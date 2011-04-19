@@ -19,6 +19,8 @@ import org.jbox2d.dynamics.contacts.ContactResult;
 
 import edu.benjones.getUp2D.Controllers.Controller;
 import edu.benjones.getUp2D.Controllers.PoseController;
+import edu.benjones.getUp2D.Controllers.SPController;
+import edu.benjones.getUp2D.Controllers.SupportPatterns.LyingPatternGenerator;
 import edu.benjones.getUp2D.characters.Biped9;
 
 public class GetUpScenario {
@@ -27,7 +29,7 @@ public class GetUpScenario {
 
 	public static final class defaultCameraParams {
 		public final static float x = 0f;
-		public final static float y = 0f;
+		public final static float y = 1f;
 		public final static float scale = 150f;
 	}
 
@@ -85,7 +87,7 @@ public class GetUpScenario {
 
 		// setup ground
 		PolygonDef sd = new PolygonDef();
-		sd.setAsBox(50f, 3f);
+		sd.setAsBox(50f, 5f);
 
 		BodyDef bd = new BodyDef();
 		bd.position.set(0f, -5f);
@@ -116,11 +118,12 @@ public class GetUpScenario {
 	public void setupCharacter() {
 		character = new Biped9(world);
 		float[] zeros = new float[character.getStateSize()];
-		character.setState(new Vec2(0f, 0f), (float) (-Math.PI / 4), zeros);
+		character.setState(new Vec2(0f, 0.5f), (float) (-Math.PI / 2), zeros);
 	}
 
 	public void setupController() {
-		controller = new PoseController(character);
+		controller = new SPController(character, new LyingPatternGenerator());
+		// controller = new PoseController(character);
 	}
 
 	public void setupDesiredPoseCharacter() {
@@ -155,8 +158,9 @@ public class GetUpScenario {
 				setupDesiredPoseCharacter();
 			float[] desiredPose = ((PoseController) controller)
 					.getDesiredPose();
+
 			desiredPoseCharacter.setState(character.getRoot().getPosition()
-					.add(new Vec2(-.5f, .5f)), character.getRoot().getAngle(),
+					.add(new Vec2(-1f, 1f)), character.getRoot().getAngle(),
 					desiredPose);
 		}
 
@@ -207,6 +211,7 @@ public class GetUpScenario {
 	// TODO TEST THIS METHOD!!!!
 	public static float getGroundHeightAt(float x) {
 		if (testRay == null) {
+			testRay = new Segment();
 			testRay.p1.y = 1000f;
 			testRay.p2.y = -1000f;
 			testRayResult = new RaycastResult();
@@ -225,6 +230,12 @@ public class GetUpScenario {
 		}
 		return ret;
 
+	}
+
+	public void reset() {
+		float[] zeros = new float[character.getStateSize()];
+		character.setState(new Vec2(0f, .5f), (float) (-Math.PI / 2), zeros);
+		controller.reset();
 	}
 
 }
