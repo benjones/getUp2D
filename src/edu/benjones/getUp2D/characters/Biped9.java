@@ -311,10 +311,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			j = joints.get(i);
 			parent = j.getBody1();
 			child = j.getBody2();
-			if (parent == root) {
-				System.out
-						.println("parent's orientation: " + parent.getAngle());
-			}
+
 			angle = parent.getAngle() + relativeOrientations[i];
 			xf.R = Mat22.createRotationalTransform(angle);
 			position = j.getAnchor1().sub(XForm.mul(xf, j.m_localAnchor2));
@@ -449,7 +446,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			// angle of parent
 			float thetap = hip.getBody1().getAngle();
 
-			float hipAngle = (float) (Math.PI + thetap + thetav + theta1);
+			float hipAngle = (float) (Math.PI * .5 + thetap + thetav + theta1);
 			if (!this.posAngle)
 				hipAngle += Math.PI;
 

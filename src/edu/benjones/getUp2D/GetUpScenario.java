@@ -33,6 +33,20 @@ public class GetUpScenario {
 		public final static float scale = 150f;
 	}
 
+	protected static class OriginalPosition {
+		public final float x;
+		public final float y;
+		public final float angle;
+
+		public OriginalPosition(float x, float y, float angle) {
+			this.x = x;
+			this.y = y;
+			this.angle = angle;
+		}
+	}
+
+	protected OriginalPosition originalPosition;
+
 	public DebugDraw debugDraw;
 
 	protected static World world;
@@ -53,7 +67,7 @@ public class GetUpScenario {
 	private static Body ground;
 
 	public GetUpScenario(DebugDraw g) {
-
+		setupInitialPosition();
 		if (contactMap == null)
 			contactMap = new HashMap<ContactID, ContactResult>();
 		else {
@@ -68,6 +82,10 @@ public class GetUpScenario {
 		createWorld();
 		setupCharacter();
 		setupController();
+	}
+
+	public void setupInitialPosition() {
+		originalPosition = new OriginalPosition(0f, 1f, (float) -(Math.PI / 2));
 	}
 
 	public void createWorld() {
@@ -118,10 +136,12 @@ public class GetUpScenario {
 	public void setupCharacter() {
 		character = new Biped9(world);
 		float[] zeros = new float[character.getStateSize()];
-		character.setState(new Vec2(0f, 0.5f), (float) (-Math.PI / 2), zeros);
+		character.setState(new Vec2(originalPosition.x, originalPosition.y),
+				originalPosition.angle, zeros);
 	}
 
 	public void setupController() {
+		// controller = new IKTestController(character);
 		controller = new SPController(character, new LyingPatternGenerator());
 		// controller = new PoseController(character);
 	}
@@ -151,8 +171,6 @@ public class GetUpScenario {
 		// empty it, the refill it next frame
 		contactMap.clear();
 
-		world.step(timestep, iterationCount);
-
 		if (drawDesiredPose) {
 			if (!desiredPoseSetup)
 				setupDesiredPoseCharacter();
@@ -168,7 +186,7 @@ public class GetUpScenario {
 			controller.drawControllerExtras(debugDraw);
 		}
 		// debugDraw.drawString(5, 12, "test", new Color3f(255f, 255f, 255f));
-
+		world.step(timestep, iterationCount);
 	}
 
 	public void setDrawContactPoints(boolean drawContactPoints) {
@@ -234,7 +252,8 @@ public class GetUpScenario {
 
 	public void reset() {
 		float[] zeros = new float[character.getStateSize()];
-		character.setState(new Vec2(0f, .5f), (float) (-Math.PI / 2), zeros);
+		character.setState(new Vec2(originalPosition.x, originalPosition.y),
+				originalPosition.angle, zeros);
 		controller.reset();
 	}
 

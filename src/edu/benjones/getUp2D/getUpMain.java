@@ -25,7 +25,11 @@ public class getUpMain extends PApplet {
 		frameRate(GetUpScenario.framerate);
 		g = new ProcessingDebugDraw(this);
 
-		getUpScenario = new GetUpScenario(g);// FixedBaseScenario(g);
+		if (true) {
+			getUpScenario = new GetUpScenario(g);
+		} else {
+			getUpScenario = new FixedBaseScenario(g);
+		}
 
 		this.addKeyListener(new KeyListener() {
 
