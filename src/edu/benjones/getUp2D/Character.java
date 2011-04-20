@@ -64,6 +64,8 @@ public interface Character {
 
 		public Vec2 getEndEffectorPosition();
 
+		public Vec2 getKneePosition();
+
 		public List<Body> getBodies();
 
 		public float getNormalForceOnLeg(float dt);

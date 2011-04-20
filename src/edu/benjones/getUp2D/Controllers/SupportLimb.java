@@ -72,14 +72,23 @@ public class SupportLimb {
 		supportInfo info = pattern.getInfoAtTime(phase);
 		if (info.ls != lastStatus) {
 			if (info.ls == limbStatus.swing) {
-				System.out.println("switched to swing from " + lastStatus);
-				swingBegin = limb.getEndEffectorPosition();
-
+				if (info.kneel) {
+					System.out.println("switched to swing kneel from "
+							+ lastStatus);
+					swingBegin = limb.getKneePosition();
+				} else {
+					System.out.println("switched to swing from " + lastStatus);
+					swingBegin = limb.getEndEffectorPosition();
+				}
 				swingEnd.x = limb.getBase().getAnchor2().x + info.xOffset;
 				swingEnd.y = GetUpScenario.getGroundHeightAt(swingEnd.x);
 				halfwayDone = false;
 			} else if (info.ls == limbStatus.stance) {
-				swingEnd.x = limb.getEndEffectorPosition().x;
+				if (info.kneel) {
+					swingEnd.x = limb.getKneePosition().x;
+				} else {
+					swingEnd.x = limb.getEndEffectorPosition().x;
+				}
 				swingEnd.y = GetUpScenario.getGroundHeightAt(swingEnd.x);
 			}
 			lastStatus = info.ls;
@@ -138,6 +147,10 @@ public class SupportLimb {
 				.getChildJoint(j)) {
 			controlParams.get(jmap.get(j)).scale(alpha);
 		}
+	}
+
+	public void addGravityCompensationTorques(List<VirtualForce> virtualForces) {
+		limb.addGravityCompenstaionTorques(virtualForces);
 	}
 
 }

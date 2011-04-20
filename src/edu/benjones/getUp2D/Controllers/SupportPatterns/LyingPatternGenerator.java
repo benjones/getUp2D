@@ -16,6 +16,11 @@ public class LyingPatternGenerator implements SupportPatternGenerator {
 		sp.addLimbStatus(supportLabel.leftArm, 2.0f, new supportInfo(
 				limbStatus.stance, false, 0f));
 
+		sp.addLimbStatus(supportLabel.rightLeg, 1.5f, new supportInfo(
+				limbStatus.swing, true, -.1f));
+		sp.addLimbStatus(supportLabel.rightLeg, 6.7f, new supportInfo(
+				limbStatus.stance, true, 0f));
+
 		return sp;
 	}
 

@@ -23,6 +23,8 @@ public class SPController extends PoseController {
 	// scale "idle" limb torques by this much
 	private float idleModifier = 1.0f;// .1f;
 
+	private ArrayList<VirtualForce> virtualForces;
+
 	public SPController(Character ch, SupportPatternGenerator g) {
 		super(ch);
 		sp = g.getPattern();
@@ -39,11 +41,14 @@ public class SPController extends PoseController {
 				controlParams.size());
 		for (ControlParam cp : controlParams) {
 			originalControlParams.add(new ControlParam(cp));
+
 		}
+		virtualForces = new ArrayList<VirtualForce>();
 	}
 
 	@Override
 	public void computeTorques(World w, float dt) {
+		virtualForces.clear();
 		boolean advance = true;
 		supportInfo now, later;
 		for (supportLabel limb : supportLabel.values()) {
@@ -53,13 +58,10 @@ public class SPController extends PoseController {
 			if (now.ls != later.ls) {
 				if (later.ls == limbStatus.stance
 						&& !limbs[limb.ordinal()].canSupport()) {
-					System.out.println("limb " + limb + " can't support");
 					advance = false;
 				}
 				if (now.ls == limbStatus.stance
 						&& !limbs[limb.ordinal()].canRemoveSupport(dt)) {
-					System.out.println("limbs " + limb
-							+ " can't remove support");
 					advance = false;
 				}
 			}
@@ -84,6 +86,16 @@ public class SPController extends PoseController {
 		super.computeTorques(w, dt);
 
 		// now VF feedback stuff
+		for (supportLabel limb : supportLabel.values()) {
+			if (sp.getInfoNow(limb).ls == limbStatus.swing) {
+				limbs[limb.ordinal()]
+						.addGravityCompensationTorques(virtualForces);
+			}
+		}
+
+		for (VirtualForce v : virtualForces) {
+			v.apply();
+		}
 	}
 
 	@Override
@@ -94,6 +106,9 @@ public class SPController extends PoseController {
 			limb.draw(g);
 
 		sp.draw(g);
+		for (VirtualForce v : virtualForces) {
+			v.draw(g);
+		}
 
 	}
 

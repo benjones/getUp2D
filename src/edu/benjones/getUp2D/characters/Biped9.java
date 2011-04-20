@@ -519,12 +519,23 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 
 		@Override
 		public void setDesiredPoseKneel(Vec2 kneePos, float[] desiredPose) {
+			Vec2 relVec = kneePos.sub(hip.getAnchor2());
+			float upperAngle = (float) Math.atan2(relVec.y, relVec.x);
+			desiredPose[jointMap.get(hip)] = (float) (upperAngle
+					- hip.getBody1().getAngle() + Math.PI * .5);
+			desiredPose[jointMap.get(PhysicsUtils.getChildJoint(hip))] = (float) (-.5
+					* Math.PI - hip.getBody2().getAngle());
 
 		}
 
 		@Override
 		public HashMap<RevoluteJoint, Integer> getJointMap() {
 			return jointMap;
+		}
+
+		@Override
+		public Vec2 getKneePosition() {
+			return PhysicsUtils.getChildJoint(hip).getAnchor1();
 		}
 	}
 
