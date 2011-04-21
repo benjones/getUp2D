@@ -191,6 +191,7 @@ public class GetUpScenario {
 		}
 		// debugDraw.drawString(5, 12, "test", new Color3f(255f, 255f, 255f));
 		world.step(timestep, iterationCount);
+
 	}
 
 	public void setDrawContactPoints(boolean drawContactPoints) {

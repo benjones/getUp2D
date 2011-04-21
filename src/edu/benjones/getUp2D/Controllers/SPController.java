@@ -3,6 +3,7 @@ package edu.benjones.getUp2D.Controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.DebugDraw;
 import org.jbox2d.dynamics.World;
 
@@ -19,9 +20,6 @@ public class SPController extends PoseController {
 	private SupportLimb[] limbs;
 
 	private ArrayList<ControlParam> originalControlParams;
-
-	// scale "idle" limb torques by this much
-	private float idleModifier = 1.0f;// .1f;
 
 	private ArrayList<VirtualForce> virtualForces;
 
@@ -79,7 +77,8 @@ public class SPController extends PoseController {
 		}
 		for (supportLabel limb : supportLabel.values()) {
 			if (sp.getInfoNow(limb).ls == limbStatus.idle) {
-				limbs[limb.ordinal()].scaleGains(idleModifier, controlParams);
+				limbs[limb.ordinal()].scaleGains(sp.getIdleModifier(),
+						controlParams);
 			}
 		}
 
@@ -91,6 +90,46 @@ public class SPController extends PoseController {
 				limbs[limb.ordinal()]
 						.addGravityCompensationTorques(virtualForces);
 			}
+		}
+
+		// control shoulder height
+		if (limbs[supportLabel.leftArm.ordinal()].canAndShouldSupport()
+				|| limbs[supportLabel.rightArm.ordinal()].canAndShouldSupport()) {
+
+			float error = sp.getShoulderHeightNow()
+					- limbs[supportLabel.leftArm.ordinal()]
+							.getShoulderPosition().y;
+			float vError = character
+					.getRoot()
+					.getLinearVelocityFromWorldPoint(
+							limbs[supportLabel.leftArm.ordinal()]
+									.getShoulderPosition()).length();
+
+			System.out.println("error: " + error + " vError: " + vError);
+
+			float yForce = Math.max(error * sp.getShouldersVerticalKP()
+					- vError * sp.getShouldersVerticalKD(), 0f);
+
+			if (limbs[supportLabel.leftArm.ordinal()].canAndShouldSupport()) {
+				if (limbs[supportLabel.rightArm.ordinal()]
+						.canAndShouldSupport()) {
+					Vec2 f = new Vec2(0f, -.5f * yForce);
+					limbs[supportLabel.rightArm.ordinal()].addForceOnFoot(f,
+							virtualForces);
+					limbs[supportLabel.leftArm.ordinal()].addForceOnFoot(f,
+							virtualForces);
+				} else {
+					// left arm only
+					limbs[supportLabel.leftArm.ordinal()].addForceOnFoot(
+							new Vec2(0f, -yForce), virtualForces);
+				}
+			} else {
+				// right arm only. Must be, since at least one is can/should
+				// support
+				limbs[supportLabel.rightArm.ordinal()].addForceOnFoot(new Vec2(
+						0f, -yForce), virtualForces);
+			}
+
 		}
 
 		for (VirtualForce v : virtualForces) {

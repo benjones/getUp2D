@@ -56,6 +56,8 @@ public interface Character {
 		public void addGravityCompenstaionTorques(
 				List<VirtualForce> virtualForces);
 
+		public void addForceOnFoot(Vec2 force, List<VirtualForce> virtualForces);
+
 		public HashMap<RevoluteJoint, Integer> getJointMap();
 
 		public void setDesiredPose(Vec2 eepos, float[] desiredPose);

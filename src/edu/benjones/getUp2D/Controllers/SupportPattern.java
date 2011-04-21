@@ -151,11 +151,11 @@ public class SupportPattern {
 		return shoulderHeight.evaluateLinear(t);
 	}
 
-	public float getHipHeightNow(float t) {
+	public float getHipHeightNow() {
 		return getHipHeightAtTime(phase);
 	}
 
-	public float getShoulderHeightNow(float t) {
+	public float getShoulderHeightNow() {
 		return getShoulderHeightAtTime(phase);
 	}
 
@@ -394,5 +394,53 @@ public class SupportPattern {
 
 	public void reset() {
 		phase = 0;
+	}
+
+	protected float idleModifier;
+
+	public float getIdleModifier() {
+		return idleModifier;
+	}
+
+	// scale "idle" limb torques by this much
+	public void setIdleModifier(float idleModifier) {
+		this.idleModifier = idleModifier;
+	}
+
+	protected float hipsVerticalKP;
+	protected float shouldersVerticalKP;
+	protected float hipsVerticalKD;
+	protected float shouldersVerticalKD;
+
+	public float getHipsVerticalKD() {
+		return hipsVerticalKD;
+	}
+
+	public void setHipsVerticalKD(float hipsVerticalKD) {
+		this.hipsVerticalKD = hipsVerticalKD;
+	}
+
+	public float getShouldersVerticalKD() {
+		return shouldersVerticalKD;
+	}
+
+	public void setShouldersVerticalKD(float shouldersVerticalKD) {
+		this.shouldersVerticalKD = shouldersVerticalKD;
+	}
+
+	public float getHipsVerticalKP() {
+		return hipsVerticalKP;
+	}
+
+	public void setHipsVerticalKP(float hipsVerticalKP) {
+		this.hipsVerticalKP = hipsVerticalKP;
+	}
+
+	public float getShouldersVerticalKP() {
+		return shouldersVerticalKP;
+	}
+
+	public void setShouldersVerticalKP(float shouldersVerticalKP) {
+		this.shouldersVerticalKP = shouldersVerticalKP;
 	}
 }

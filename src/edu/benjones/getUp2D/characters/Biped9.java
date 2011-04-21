@@ -355,8 +355,8 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 
 	public static Character getStaticCharacter(World w) {
 		Character ret = makeCharacter(w);
-		for (Body b : ret.getBodies())
-			;// b.setMass(new MassData());
+		// for (Body b : ret.getBodies())
+		// b.setMass(new MassData());
 		return ret;
 	}
 
@@ -405,19 +405,27 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			return hip;
 		}
 
+		private final Vec2 zero = new Vec2(0f, 0f);
+
 		@Override
 		public void addGravityCompenstaionTorques(
 				List<VirtualForce> virtualForces) {
 
 			RevoluteJoint curr = hip;
 			Body b;
-			Vec2 zero = new Vec2(0f, 0f);
+
 			while (curr != null) {
 				b = curr.getBody2();
 				virtualForces.add(new VirtualForce(hip, b, zero, world
 						.getGravity().mul(-b.getMass())));
 				curr = PhysicsUtils.getChildJoint(curr);
 			}
+		}
+
+		@Override
+		public void addForceOnFoot(Vec2 force, List<VirtualForce> virtualForces) {
+			virtualForces.add(new VirtualForce(hip, this.endEffector, zero,
+					force));
 		}
 
 		private float maxLength = .999f;

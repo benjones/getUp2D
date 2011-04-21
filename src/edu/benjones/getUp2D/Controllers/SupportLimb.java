@@ -56,6 +56,10 @@ public class SupportLimb {
 		return plantedLevel > 0f;
 	}
 
+	public boolean canAndShouldSupport() {
+		return plantedLevel > 0f && this.lastStatus == limbStatus.stance;
+	}
+
 	public boolean canRemoveSupport(float dt) {
 		float f = (limb.getNormalForceOnLeg(dt) + limb
 				.getTangentialForceOnLeg(dt));
@@ -151,6 +155,14 @@ public class SupportLimb {
 
 	public void addGravityCompensationTorques(List<VirtualForce> virtualForces) {
 		limb.addGravityCompenstaionTorques(virtualForces);
+	}
+
+	public Vec2 getShoulderPosition() {
+		return limb.getBase().getAnchor2();
+	}
+
+	public void addForceOnFoot(Vec2 force, List<VirtualForce> virtualForces) {
+		limb.addForceOnFoot(force, virtualForces);
 	}
 
 }

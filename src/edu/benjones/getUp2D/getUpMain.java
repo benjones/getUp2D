@@ -20,6 +20,7 @@ public class getUpMain extends PApplet {
 		super();
 	}
 
+	@SuppressWarnings("unused")
 	public void setup() {
 		size(800, 800, P3D);
 		frameRate(GetUpScenario.framerate);
@@ -61,14 +62,16 @@ public class getUpMain extends PApplet {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		PApplet.main(new String[] { "org.jbox2d.testbed.TestbedMain" });
+		PApplet.main(new String[] { "Get up 2D" });
 
 	}
 
 	public void draw() {
 		background(0);
 		getUpScenario.step();
-		// do step here
+
+		// this.saveFrame();
+		// I could also maybe look at using movie maker
 	}
 
 }
