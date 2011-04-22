@@ -29,10 +29,14 @@ public class SPController extends PoseController {
 		List<Limb> arms = character.getArms();
 		List<Limb> legs = character.getLegs();
 		limbs = new SupportLimb[SupportPattern.supportLabel.values().length];
-		limbs[supportLabel.leftArm.ordinal()] = new SupportLimb(arms.get(0));
-		limbs[supportLabel.rightArm.ordinal()] = new SupportLimb(arms.get(1));
-		limbs[supportLabel.leftLeg.ordinal()] = new SupportLimb(legs.get(0));
-		limbs[supportLabel.rightLeg.ordinal()] = new SupportLimb(legs.get(1));
+		limbs[supportLabel.leftArm.ordinal()] = new SupportLimb(arms.get(0),
+				sp, supportLabel.leftArm);
+		limbs[supportLabel.rightArm.ordinal()] = new SupportLimb(arms.get(1),
+				sp, supportLabel.rightArm);
+		limbs[supportLabel.leftLeg.ordinal()] = new SupportLimb(legs.get(0),
+				sp, supportLabel.leftLeg);
+		limbs[supportLabel.rightLeg.ordinal()] = new SupportLimb(legs.get(1),
+				sp, supportLabel.rightLeg);
 
 		// copy control params to modify them per step
 		originalControlParams = new ArrayList<ControlParam>(
@@ -104,8 +108,6 @@ public class SPController extends PoseController {
 					.getLinearVelocityFromWorldPoint(
 							limbs[supportLabel.leftArm.ordinal()]
 									.getShoulderPosition()).length();
-
-			System.out.println("error: " + error + " vError: " + vError);
 
 			float yForce = Math.max(error * sp.getShouldersVerticalKP()
 					- vError * sp.getShouldersVerticalKD(), 0f);

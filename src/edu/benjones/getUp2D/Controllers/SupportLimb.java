@@ -14,6 +14,7 @@ import edu.benjones.getUp2D.GetUpScenario;
 import edu.benjones.getUp2D.Controllers.SupportPattern.limbPattern;
 import edu.benjones.getUp2D.Controllers.SupportPattern.limbStatus;
 import edu.benjones.getUp2D.Controllers.SupportPattern.supportInfo;
+import edu.benjones.getUp2D.Controllers.SupportPattern.supportLabel;
 import edu.benjones.getUp2D.Utils.PhysicsUtils;
 import edu.benjones.getUp2D.Utils.Trajectory1D;
 import edu.benjones.getUp2D.Utils.Trajectory1D.entry;
@@ -21,6 +22,7 @@ import edu.benjones.getUp2D.Utils.Trajectory1D.entry;
 public class SupportLimb {
 
 	protected Limb limb;
+	protected supportLabel limbLabel;
 	protected limbStatus lastStatus;
 
 	protected float plantedLevel;
@@ -28,13 +30,19 @@ public class SupportLimb {
 
 	protected Vec2 ikTarg;
 
-	public SupportLimb(Limb limb) {
+	protected SupportPattern parent;
+
+	public SupportLimb(Limb limb, SupportPattern parent, supportLabel limbLabel) {
 		this.limb = limb;
 		heightTraj = new Trajectory1D();
 		heightTraj.addKnot(new entry(0f, 0f));
 		heightTraj.addKnot(new entry(.1f, .15f));
 		heightTraj.addKnot(new entry(.8f, .15f));
 		heightTraj.addKnot(new entry(1.0f, 0f));
+
+		this.parent = parent;
+		this.limbLabel = limbLabel;
+
 		reset();
 	}
 
@@ -119,6 +127,15 @@ public class SupportLimb {
 		} else if (info.ls == limbStatus.stance) {
 			ikTarg = swingEnd;
 			ikTarg.y = GetUpScenario.getGroundHeightAt(ikTarg.x);
+			float desHeight;
+			if (limbLabel == supportLabel.leftLeg
+					|| limbLabel == supportLabel.rightLeg) {
+				// use hip traj
+				desHeight = parent.getHipHeightNow();
+			} else {
+				desHeight = parent.getShoulderHeightNow();
+			}
+			ikTarg.y = Math.min(limb.getBase().getAnchor2().y - desHeight, 0f);
 			// might do quadruped style hipHeight - hipHeightDes style thing
 			// here if VF's aren't good enough
 		}

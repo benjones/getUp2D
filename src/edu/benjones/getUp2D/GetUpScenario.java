@@ -168,9 +168,6 @@ public class GetUpScenario {
 		// drawing gets done here I guess?
 		controller.computeTorques(world, timestep);
 
-		// empty it, the refill it next frame
-		contactMap.clear();
-
 		if (drawDesiredPose) {
 			if (!desiredPoseSetup)
 				setupDesiredPoseCharacter();
@@ -190,6 +187,10 @@ public class GetUpScenario {
 			controller.drawControllerExtras(debugDraw);
 		}
 		// debugDraw.drawString(5, 12, "test", new Color3f(255f, 255f, 255f));
+
+		// empty it, the refill it next frame
+		contactMap.clear();
+		System.out.println("contact map cleared");
 		world.step(timestep, iterationCount);
 
 	}

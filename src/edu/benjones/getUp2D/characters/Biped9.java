@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.jbox2d.collision.ContactID;
 import org.jbox2d.collision.FilterData;
-import org.jbox2d.collision.Manifold;
 import org.jbox2d.collision.shapes.PolygonDef;
 import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Mat22;
@@ -15,8 +14,6 @@ import org.jbox2d.common.XForm;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.World;
-import org.jbox2d.dynamics.contacts.Contact;
-import org.jbox2d.dynamics.contacts.ContactEdge;
 import org.jbox2d.dynamics.contacts.ContactResult;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
@@ -483,19 +480,17 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			float force = 0f;
 			HashMap<ContactID, ContactResult> contactMap = GetUpScenario
 					.getContactMap();
+			System.out.println("Contact map size: " + contactMap.size());
+
 			for (Body b : getBodies()) {
-				for (ContactEdge e = b.getContactList(); e != null; e = e.next) {
-					Contact c = e.contact;
-					for (Manifold m : c.getManifolds()) {
-						for (int i = 0; i < m.pointCount; ++i) {
-							force += Math
-									.abs(contactMap.get(m.points[i].id).normalImpulse
-											/ dt);
-						}
+				for (ContactResult cr : contactMap.values()) {
+					if (cr.shape1.m_body == b || cr.shape2.m_body == b) {
+						System.out.println("cr: " + cr + " has force on: " + b);
+						force += Math.abs(cr.normalImpulse / dt);
 					}
 				}
-
 			}
+			System.out.println("normal force: " + force);
 			return force;
 		}
 
@@ -505,18 +500,15 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			HashMap<ContactID, ContactResult> contactMap = GetUpScenario
 					.getContactMap();
 			for (Body b : getBodies()) {
-				for (ContactEdge e = b.getContactList(); e != null; e = e.next) {
-					Contact c = e.contact;
-					for (Manifold m : c.getManifolds()) {
-						for (int i = 0; i < m.pointCount; ++i) {
-							force += Math
-									.abs(contactMap.get(m.points[i].id).tangentImpulse
-											/ dt);
-						}
+				for (ContactResult cr : contactMap.values()) {
+					if (cr.shape1.m_body == b || cr.shape2.m_body == b) {
+						System.out.println("cr: " + cr
+								+ " has tangent force on: " + b);
+						force += Math.abs(cr.tangentImpulse / dt);
 					}
 				}
-
 			}
+			System.out.println("Tangent force: " + force);
 			return force;
 		}
 
