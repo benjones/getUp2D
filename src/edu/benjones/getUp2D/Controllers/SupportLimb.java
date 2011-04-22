@@ -71,7 +71,6 @@ public class SupportLimb {
 	public boolean canRemoveSupport(float dt) {
 		float f = (limb.getNormalForceOnLeg(dt) + limb
 				.getTangentialForceOnLeg(dt));
-		System.out.println("total force on leg: " + f);
 		return f < 20;
 	}
 

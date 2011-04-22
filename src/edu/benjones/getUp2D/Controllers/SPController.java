@@ -115,11 +115,31 @@ public class SPController extends PoseController {
 			if (limbs[supportLabel.leftArm.ordinal()].canAndShouldSupport()) {
 				if (limbs[supportLabel.rightArm.ordinal()]
 						.canAndShouldSupport()) {
-					Vec2 f = new Vec2(0f, -.5f * yForce);
-					limbs[supportLabel.rightArm.ordinal()].addForceOnFoot(f,
-							virtualForces);
-					limbs[supportLabel.leftArm.ordinal()].addForceOnFoot(f,
-							virtualForces);
+					// scale based on which one is supposed to lift first.
+					// only look 1s into the future
+					float lLift = Math.min(
+							sp.getTimeToLift(supportLabel.leftArm), 1f);
+					float rLift = Math.min(
+							sp.getTimeToLift(supportLabel.rightArm), 1f);
+					Vec2 f = new Vec2(0f, -yForce);
+
+					float lScale;// what fraction of force should the left arm
+									// do
+					// right arm = 1-lScale.
+					if (lLift > 0) {
+						if (rLift > 0) {
+							lScale = lLift / (rLift + lLift);
+						} else {
+							lScale = 1.0f;
+						}
+					} else {
+						lScale = 0f;
+					}
+
+					limbs[supportLabel.rightArm.ordinal()].addForceOnFoot(
+							f.mul(1 - lScale), virtualForces);
+					limbs[supportLabel.leftArm.ordinal()].addForceOnFoot(
+							f.mul(lScale), virtualForces);
 				} else {
 					// left arm only
 					limbs[supportLabel.leftArm.ordinal()].addForceOnFoot(

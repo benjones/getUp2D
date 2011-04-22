@@ -480,17 +480,15 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			float force = 0f;
 			HashMap<ContactID, ContactResult> contactMap = GetUpScenario
 					.getContactMap();
-			System.out.println("Contact map size: " + contactMap.size());
 
 			for (Body b : getBodies()) {
 				for (ContactResult cr : contactMap.values()) {
 					if (cr.shape1.m_body == b || cr.shape2.m_body == b) {
-						System.out.println("cr: " + cr + " has force on: " + b);
+
 						force += Math.abs(cr.normalImpulse / dt);
 					}
 				}
 			}
-			System.out.println("normal force: " + force);
 			return force;
 		}
 
@@ -502,13 +500,12 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			for (Body b : getBodies()) {
 				for (ContactResult cr : contactMap.values()) {
 					if (cr.shape1.m_body == b || cr.shape2.m_body == b) {
-						System.out.println("cr: " + cr
-								+ " has tangent force on: " + b);
+
 						force += Math.abs(cr.tangentImpulse / dt);
 					}
 				}
 			}
-			System.out.println("Tangent force: " + force);
+
 			return force;
 		}
 

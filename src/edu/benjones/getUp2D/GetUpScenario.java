@@ -190,7 +190,7 @@ public class GetUpScenario {
 
 		// empty it, the refill it next frame
 		contactMap.clear();
-		System.out.println("contact map cleared");
+
 		world.step(timestep, iterationCount);
 
 	}
