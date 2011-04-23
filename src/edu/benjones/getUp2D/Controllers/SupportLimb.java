@@ -36,8 +36,8 @@ public class SupportLimb {
 		this.limb = limb;
 		heightTraj = new Trajectory1D();
 		heightTraj.addKnot(new entry(0f, 0f));
-		heightTraj.addKnot(new entry(.1f, .15f));
-		heightTraj.addKnot(new entry(.8f, .15f));
+		heightTraj.addKnot(new entry(.1f, .1f));
+		heightTraj.addKnot(new entry(.8f, .1f));
 		heightTraj.addKnot(new entry(1.0f, 0f));
 
 		this.parent = parent;
@@ -57,6 +57,8 @@ public class SupportLimb {
 		if (ikTarg != null) {
 
 			g.drawCircle(ikTarg, .05f, Color3f.WHITE);
+			g.drawCircle(ikTarg.add(new Vec2(-1f, 1f)), .05f, Color3f.WHITE);
+
 		}
 	}
 

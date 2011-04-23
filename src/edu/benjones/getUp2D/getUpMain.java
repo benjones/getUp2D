@@ -16,12 +16,15 @@ public class getUpMain extends PApplet {
 	private GetUpScenario getUpScenario;
 	public DebugDraw g;
 
+	private boolean paused;
+
 	public getUpMain() {
 		super();
 	}
 
 	@SuppressWarnings("unused")
 	public void setup() {
+		paused = false;
 		size(800, 800, P3D);
 		frameRate(GetUpScenario.framerate);
 		g = new ProcessingDebugDraw(this);
@@ -38,6 +41,11 @@ public class getUpMain extends PApplet {
 			public void keyTyped(KeyEvent e) {
 				if (e.getKeyChar() == 'r') {
 					getUpScenario.reset();
+				} else if (e.getKeyChar() == 'd') {
+					getUpScenario.setDrawDesiredPose(!getUpScenario
+							.getDrawDesiredPose());
+				} else if (e.getKeyChar() == 'p') {
+					paused = !paused;
 				}
 
 			}
@@ -67,11 +75,13 @@ public class getUpMain extends PApplet {
 	}
 
 	public void draw() {
-		background(0);
-		getUpScenario.step();
+		if (!paused) {
+			background(0);
+			getUpScenario.step();
 
-		// this.saveFrame();
-		// I could also maybe look at using movie maker
+			// this.saveFrame();
+			// I could also maybe look at using movie maker
+		}
 	}
 
 }

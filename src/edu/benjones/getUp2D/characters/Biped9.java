@@ -102,9 +102,9 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 
 		shoulderDef = new RevoluteJointDef();
 		shoulderDef.initialize(root, leftUpperArm, shoulderTorsoOffset);
-		shoulderDef.lowerAngle = (float) (-3 * Math.PI / 4.0);
-		shoulderDef.upperAngle = (float) (3 * Math.PI / 4.0);
-		shoulderDef.enableLimit = true;
+		shoulderDef.lowerAngle = (float) (-2 * Math.PI);
+		shoulderDef.upperAngle = (float) (2 * Math.PI);
+		shoulderDef.enableLimit = false;
 
 		leftShoulder = (RevoluteJoint) w.createJoint(shoulderDef);
 
@@ -124,8 +124,8 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		elbowDef = new RevoluteJointDef();
 		elbowDef.initialize(leftUpperArm, leftLowerArm, leftUpperArm
 				.getPosition().add(elbowUpperArmOffset));
-		elbowDef.lowerAngle = (float) (-.75 * Math.PI);
-		elbowDef.upperAngle = (float) (.75 * Math.PI);
+		elbowDef.lowerAngle = (float) (-.95 * Math.PI);
+		elbowDef.upperAngle = (float) (.95 * Math.PI);
 		elbowDef.enableLimit = true;
 
 		leftElbow = (RevoluteJoint) w.createJoint(elbowDef);
@@ -264,9 +264,9 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		defaultControlParams = new ArrayList<ControlParam>();
 		ControlParam hip, shoulder, knee, elbow;
 		hip = new ControlParam(35, 8);
-		shoulder = new ControlParam(30, 5);
+		shoulder = new ControlParam(35, 5);
 		knee = new ControlParam(30, 8);
-		elbow = new ControlParam(30, 2);
+		elbow = new ControlParam(35, 2);
 		defaultControlParams.add(shoulder);
 		defaultControlParams.add(shoulder);
 		defaultControlParams.add(elbow);
@@ -414,7 +414,8 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			while (curr != null) {
 				b = curr.getBody2();
 				virtualForces.add(new VirtualForce(hip, b, zero, world
-						.getGravity().mul(-b.getMass())));
+						.getGravity().mul(-b.getMass() * .7f)));// scale it a
+																// little
 				curr = PhysicsUtils.getChildJoint(curr);
 			}
 		}
@@ -425,7 +426,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 					force));
 		}
 
-		private float maxLength = .999f;
+		private float maxLength = .9999f;
 
 		@Override
 		public void setDesiredPose(Vec2 eepos, float[] desiredPose) {
@@ -445,14 +446,17 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 
 			// angle between relVec and the desired link1
 			float theta1 = (float) Math.asin(l2 * Math.sin(kneePre) / l3);
+
 			// global angle of relVec
 			float thetav = (float) Math.atan2(relVec.y, relVec.x);
 			// angle of parent
 			float thetap = hip.getBody1().getAngle();
 
-			float hipAngle = (float) (Math.PI * 1.5 + thetap + thetav + theta1);
-			if (!this.posAngle)
-				hipAngle += Math.PI;
+			float hipAngle = -(float) (thetap - (thetav - .5 * Math.PI) - theta1);
+
+			if (posAngle) {
+				hipAngle = (float) (thetav - .5 * Math.PI + theta1 - thetap - Math.PI);
+			}
 
 			desiredPose[jointMap.get(hip)] = hipAngle;
 			desiredPose[jointMap.get(PhysicsUtils.getChildJoint(hip))] = kneeAngle;
