@@ -36,8 +36,8 @@ public class SupportLimb {
 		this.limb = limb;
 		heightTraj = new Trajectory1D();
 		heightTraj.addKnot(new entry(0f, 0f));
-		heightTraj.addKnot(new entry(.1f, .1f));
-		heightTraj.addKnot(new entry(.8f, .1f));
+		heightTraj.addKnot(new entry(.1f, .10f));
+		heightTraj.addKnot(new entry(.9f, .15f));
 		heightTraj.addKnot(new entry(1.0f, 0f));
 
 		this.parent = parent;
@@ -71,9 +71,14 @@ public class SupportLimb {
 	}
 
 	public boolean canRemoveSupport(float dt) {
-		float f = (limb.getNormalForceOnLeg(dt) + limb
-				.getTangentialForceOnLeg(dt));
-		return f < 20;
+		float tangential = limb.getTangentialForceOnLeg(dt);
+		float normal = limb.getNormalForceOnLeg(dt);
+		float f = (tangential + normal);
+		if (f >= 20) {
+			System.out.println("force preventing lift, normal:" + normal
+					+ " tangential: " + tangential);
+		}
+		return f < 30;
 	}
 
 	protected Vec2 swingBegin, swingEnd;
@@ -103,6 +108,11 @@ public class SupportLimb {
 					swingEnd.x = limb.getEndEffectorPosition().x;
 				}
 				swingEnd.y = GetUpScenario.getGroundHeightAt(swingEnd.x);
+				// if its lifting soon, shift weight to other limb
+				float ttl = parent.getTimeToLift(limbLabel);
+				if (ttl < .5) {
+					swingEnd.y += .03 * ttl;
+				}
 			}
 			lastStatus = info.ls;
 		}

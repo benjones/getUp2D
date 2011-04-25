@@ -55,7 +55,7 @@ public class GetUpScenario {
 	private AABB worldAABB;
 	// create()
 
-	public static final float framerate = 60;
+	public static final float framerate = 300;
 	public static final int iterationCount = 10;
 
 	private boolean drawContactPoints;
@@ -164,7 +164,8 @@ public class GetUpScenario {
 			b.m_force.setZero();
 			b.m_torque = 0f;
 		}
-		float timestep = (float) (1.0 / framerate) * .25f;
+		// playback speed
+		float timestep = (float) (1.0 / framerate) * 1f;
 		// drawing gets done here I guess?
 		controller.computeTorques(world, timestep);
 

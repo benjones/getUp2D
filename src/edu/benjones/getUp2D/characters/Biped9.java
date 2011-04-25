@@ -56,8 +56,8 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 
 		world = w;
 
-		shoulderTorsoOffset = new Vec2(.1f, .35f);
-		hipTorsoOffset = new Vec2(0f, -.35f);
+		shoulderTorsoOffset = new Vec2(.0f, .18f);
+		hipTorsoOffset = new Vec2(0f, -.18f);
 		shoulderUpperArmOffset = new Vec2(0f, -.12f);
 		hipUpperLegOffset = new Vec2(0f, .15f);
 		kneeUpperLegOffset = new Vec2(0f, -.15f);
@@ -72,7 +72,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		rootDef.angle = 0;
 
 		PolygonDef rootPolyDef = new PolygonDef();
-		rootPolyDef.setAsBox(.16f, .39f);
+		rootPolyDef.setAsBox(.08f, .20f);
 		rootPolyDef.density = torsoDensity;// mass/area
 		rootPolyDef.filter.groupIndex = filterGroup;
 
@@ -92,7 +92,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		leftUpperArm = w.createBody(upperArmDef);
 
 		upperArmPolyDef = new PolygonDef();
-		upperArmPolyDef.setAsBox(.05f, .15f);
+		upperArmPolyDef.setAsBox(.041f, .15f);
 		upperArmPolyDef.density = limbDensity;
 		upperArmPolyDef.filter.groupIndex = filterGroup;
 
@@ -113,7 +113,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 				.add(elbowUpperArmOffset).sub(elbowLowerArmOffset);
 
 		lowerArmPolyDef = new PolygonDef();
-		lowerArmPolyDef.setAsBox(.05f, .13f);
+		lowerArmPolyDef.setAsBox(.041f, .13f);
 		lowerArmPolyDef.density = limbDensity;
 		lowerArmPolyDef.filter.groupIndex = filterGroup;
 
@@ -156,7 +156,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		leftUpperLeg = w.createBody(upperLegDef);
 
 		upperLegPolyDef = new PolygonDef();
-		upperLegPolyDef.setAsBox(.05f, .19f);
+		upperLegPolyDef.setAsBox(.041f, .19f);
 		upperLegPolyDef.density = limbDensity;
 		upperLegPolyDef.filter.groupIndex = filterGroup;
 
@@ -167,7 +167,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		hipDef = new RevoluteJointDef();
 		hipDef.initialize(root, leftUpperLeg, hipTorsoOffset);
 		hipDef.lowerAngle = (float) (-3 * Math.PI / 4.0);
-		hipDef.upperAngle = (float) (3 * Math.PI / 4.0);
+		hipDef.upperAngle = (float) (6.0 * Math.PI / 4.0);
 		hipDef.enableLimit = true;
 
 		leftHip = (RevoluteJoint) w.createJoint(hipDef);
@@ -183,7 +183,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 				.add(kneeUpperLegOffset).sub(kneeLowerLegOffset);
 
 		lowerLegPolyDef = new PolygonDef();
-		lowerLegPolyDef.setAsBox(.05f, .16f);
+		lowerLegPolyDef.setAsBox(.041f, .16f);
 		lowerLegPolyDef.density = limbDensity;
 		lowerLegPolyDef.filter.groupIndex = filterGroup;
 
@@ -265,8 +265,8 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		ControlParam hip, shoulder, knee, elbow;
 		hip = new ControlParam(35, 8);
 		shoulder = new ControlParam(35, 5);
-		knee = new ControlParam(30, 8);
-		elbow = new ControlParam(35, 2);
+		knee = new ControlParam(35, 8);
+		elbow = new ControlParam(35, 3);
 		defaultControlParams.add(shoulder);
 		defaultControlParams.add(shoulder);
 		defaultControlParams.add(elbow);
@@ -414,8 +414,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 			while (curr != null) {
 				b = curr.getBody2();
 				virtualForces.add(new VirtualForce(hip, b, zero, world
-						.getGravity().mul(-b.getMass() * .7f)));// scale it a
-																// little
+						.getGravity().mul(-b.getMass() * .75f)));
 				curr = PhysicsUtils.getChildJoint(curr);
 			}
 		}

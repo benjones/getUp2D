@@ -18,6 +18,8 @@ public class getUpMain extends PApplet {
 
 	private boolean paused;
 
+	private boolean doReset;
+
 	public getUpMain() {
 		super();
 	}
@@ -25,6 +27,7 @@ public class getUpMain extends PApplet {
 	@SuppressWarnings("unused")
 	public void setup() {
 		paused = false;
+		doReset = false;
 		size(800, 800, P3D);
 		frameRate(GetUpScenario.framerate);
 		g = new ProcessingDebugDraw(this);
@@ -40,7 +43,7 @@ public class getUpMain extends PApplet {
 			@Override
 			public void keyTyped(KeyEvent e) {
 				if (e.getKeyChar() == 'r') {
-					getUpScenario.reset();
+					doReset = true;
 				} else if (e.getKeyChar() == 'd') {
 					getUpScenario.setDrawDesiredPose(!getUpScenario
 							.getDrawDesiredPose());
@@ -77,6 +80,10 @@ public class getUpMain extends PApplet {
 	public void draw() {
 		if (!paused) {
 			background(0);
+			if (doReset) {
+				doReset = false;
+				getUpScenario.reset();
+			}
 			getUpScenario.step();
 
 			// this.saveFrame();
