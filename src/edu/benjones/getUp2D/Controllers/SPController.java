@@ -23,6 +23,8 @@ public class SPController extends PoseController {
 
 	private ArrayList<VirtualForce> virtualForces;
 
+	private ArrayList<SupportLimb> supportArms, supportLegs;
+	
 	public SPController(Character ch, SupportPatternGenerator g) {
 		super(ch);
 		sp = g.getPattern();
@@ -38,6 +40,13 @@ public class SPController extends PoseController {
 		limbs[supportLabel.rightLeg.ordinal()] = new SupportLimb(legs.get(1),
 				sp, supportLabel.rightLeg);
 
+		supportArms = new ArrayList<SupportLimb>(2);
+		supportLegs = new ArrayList<SupportLimb>(2);
+		supportArms.add(limbs[supportLabel.leftArm.ordinal()]);
+		supportArms.add(limbs[supportLabel.rightArm.ordinal()]);
+		supportLegs.add(limbs[supportLabel.leftLeg.ordinal()]);
+		supportLegs.add(limbs[supportLabel.rightLeg.ordinal()]);
+		
 		// copy control params to modify them per step
 		originalControlParams = new ArrayList<ControlParam>(
 				controlParams.size());
@@ -96,31 +105,57 @@ public class SPController extends PoseController {
 			}
 		}
 
+		legFrameHeightCorrection(supportArms, false);
+		legFrameHeightCorrection(supportLegs, true);
+
+		//same for hips
+		
+		
+		for (VirtualForce v : virtualForces) {
+			v.apply();
+		}
+	}
+
+	/**
+	 * 
+	 * @param legFrame a list of 2 supportLimbs that are part of the leg frame
+	 * @param hips true if it's the hips, false if it's the shoulders
+	 */
+	
+	private void legFrameHeightCorrection(List<SupportLimb> legFrame, boolean hips) {
 		// control shoulder height
-		if (limbs[supportLabel.leftArm.ordinal()].canAndShouldSupport()
-				|| limbs[supportLabel.rightArm.ordinal()].canAndShouldSupport()) {
+		if (legFrame.get(0).canAndShouldSupport()
+				|| legFrame.get(1).canAndShouldSupport()) {
 
-			float error = sp.getShoulderHeightNow()
-					- limbs[supportLabel.leftArm.ordinal()]
-							.getShoulderPosition().y;
-			float vError = character
-					.getRoot()
-					.getLinearVelocityFromWorldPoint(
-							limbs[supportLabel.leftArm.ordinal()]
-									.getShoulderPosition()).length();
+			float error; 
+			float vError;
+			float yForce;
+			if(hips){
+				error = sp.getHipHeightNow() - legFrame.get(0).getShoulderPosition().y;
+				vError = character.getRoot().getLinearVelocityFromWorldPoint(
+						legFrame.get(0).getShoulderPosition()).length();
+				yForce = Math.max(error * sp.getHipsVerticalKP()
+						- vError * sp.getHipsVerticalKD(), 0f);
+			}
+			else{
+				error = sp.getShoulderHeightNow() - legFrame.get(0).getShoulderPosition().y;
+				vError = character.getRoot().getLinearVelocityFromWorldPoint(
+						legFrame.get(0).getShoulderPosition()).length();
+				yForce = Math.max(error * sp.getShouldersVerticalKP()
+						- vError * sp.getShouldersVerticalKD(), 0f);
+			}
 
-			float yForce = Math.max(error * sp.getShouldersVerticalKP()
-					- vError * sp.getShouldersVerticalKD(), 0f);
+			
+			
 
-			if (limbs[supportLabel.leftArm.ordinal()].canAndShouldSupport()) {
-				if (limbs[supportLabel.rightArm.ordinal()]
-						.canAndShouldSupport()) {
+			if (legFrame.get(0).canAndShouldSupport()) {
+				if (legFrame.get(1).canAndShouldSupport()) {
 					// scale based on which one is supposed to lift first.
 					// only look 1s into the future
 					float lLift = Math.min(
-							sp.getTimeToLift(supportLabel.leftArm), 1f);
+							sp.getTimeToLift(legFrame.get(0).limbLabel), 1f);
 					float rLift = Math.min(
-							sp.getTimeToLift(supportLabel.rightArm), 1f);
+							sp.getTimeToLift(legFrame.get(1).limbLabel), 1f);
 					Vec2 f = new Vec2(0f, -yForce);
 
 					float lScale;// what fraction of force should the left arm
@@ -136,26 +171,22 @@ public class SPController extends PoseController {
 						lScale = 0f;
 					}
 
-					limbs[supportLabel.rightArm.ordinal()].addForceOnFoot(
+					legFrame.get(1).addForceOnFoot(
 							f.mul(1 - lScale), virtualForces);
-					limbs[supportLabel.leftArm.ordinal()].addForceOnFoot(
+					legFrame.get(0).addForceOnFoot(
 							f.mul(lScale), virtualForces);
 				} else {
 					// left arm only
-					limbs[supportLabel.leftArm.ordinal()].addForceOnFoot(
+					legFrame.get(0).addForceOnFoot(
 							new Vec2(0f, -yForce), virtualForces);
 				}
 			} else {
 				// right arm only. Must be, since at least one is can/should
 				// support
-				limbs[supportLabel.rightArm.ordinal()].addForceOnFoot(new Vec2(
+				legFrame.get(1).addForceOnFoot(new Vec2(
 						0f, -yForce), virtualForces);
 			}
 
-		}
-
-		for (VirtualForce v : virtualForces) {
-			v.apply();
 		}
 	}
 
