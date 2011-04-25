@@ -28,11 +28,15 @@ public class PoseController extends AbstractController {
 
 	@Override
 	public void computeTorques(World w, float dt) {
+		computeTorquesOnly(w, dt);
+		applyTorques();
+	}
+
+	public void computeTorquesOnly(World w, float dt) {
 		List<RevoluteJoint> joints = character.getJoints();
 		for (int i = 0; i < joints.size(); ++i) {
 			this.computePDTorque(joints.get(i), i);
 		}
-		applyTorques();
 	}
 
 	@Override

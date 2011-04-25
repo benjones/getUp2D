@@ -165,7 +165,7 @@ public class GetUpScenario {
 			b.m_torque = 0f;
 		}
 		// playback speed
-		float timestep = (float) (1.0 / framerate) * 1f;
+		float timestep = (float) (1.0 / framerate) * .25f;
 		// drawing gets done here I guess?
 		controller.computeTorques(world, timestep);
 

@@ -24,7 +24,7 @@ public class SPController extends PoseController {
 	private ArrayList<VirtualForce> virtualForces;
 
 	private ArrayList<SupportLimb> supportArms, supportLegs;
-	
+
 	public SPController(Character ch, SupportPatternGenerator g) {
 		super(ch);
 		sp = g.getPattern();
@@ -46,7 +46,7 @@ public class SPController extends PoseController {
 		supportArms.add(limbs[supportLabel.rightArm.ordinal()]);
 		supportLegs.add(limbs[supportLabel.leftLeg.ordinal()]);
 		supportLegs.add(limbs[supportLabel.rightLeg.ordinal()]);
-		
+
 		// copy control params to modify them per step
 		originalControlParams = new ArrayList<ControlParam>(
 				controlParams.size());
@@ -95,7 +95,48 @@ public class SPController extends PoseController {
 			}
 		}
 
-		super.computeTorques(w, dt);
+		super.computeTorquesOnly(w, dt);
+
+		// simbicon style feedback
+		if (supportLegs.get(0).canAndShouldSupport()
+				|| supportLegs.get(1).canAndShouldSupport()) {
+
+			float dx = character.getTorsoLength();
+			float dy = sp.getShoulderHeightNow() - sp.getHipHeightNow();
+
+			float desAngle = (float) (Math.atan2(dy, dx) - Math.PI / 2);
+
+			// torque the root WANTS to see
+			float desRootTorque = sp.getRootKP()
+					* (desAngle - character.getRoot().getAngle())
+					- sp.getRootKD() * character.getRoot().getAngularVelocity();
+
+			// torso feels -torques from arms
+			float armTorque = 0;
+			for (Limb arm : character.getArms()) {
+				armTorque -= torques[arm.getJointMap().get(arm.getBase())];
+			}
+
+			float hipTorque = armTorque - desRootTorque;
+
+			List<Limb> legs = character.getLegs();
+			if (supportLegs.get(0).canAndShouldSupport()) {
+				if (supportLegs.get(1).canAndShouldSupport()) {
+					torques[legs.get(0).getJointMap()
+							.get(legs.get(0).getBase())] = hipTorque * .5f;
+					torques[legs.get(1).getJointMap()
+							.get(legs.get(1).getBase())] = hipTorque * .5f;
+				} else {
+					torques[legs.get(0).getJointMap()
+							.get(legs.get(0).getBase())] = hipTorque;
+				}
+			} else {
+				torques[legs.get(1).getJointMap().get(legs.get(1).getBase())] = hipTorque;
+			}
+
+		}
+
+		super.applyTorques();
 
 		// now VF feedback stuff
 		for (supportLabel limb : supportLabel.values()) {
@@ -108,9 +149,8 @@ public class SPController extends PoseController {
 		legFrameHeightCorrection(supportArms, false);
 		legFrameHeightCorrection(supportLegs, true);
 
-		//same for hips
-		
-		
+		// same for hips
+
 		for (VirtualForce v : virtualForces) {
 			v.apply();
 		}
@@ -118,35 +158,41 @@ public class SPController extends PoseController {
 
 	/**
 	 * 
-	 * @param legFrame a list of 2 supportLimbs that are part of the leg frame
-	 * @param hips true if it's the hips, false if it's the shoulders
+	 * @param legFrame
+	 *            a list of 2 supportLimbs that are part of the leg frame
+	 * @param hips
+	 *            true if it's the hips, false if it's the shoulders
 	 */
-	
-	private void legFrameHeightCorrection(List<SupportLimb> legFrame, boolean hips) {
+
+	private void legFrameHeightCorrection(List<SupportLimb> legFrame,
+			boolean hips) {
 		// control shoulder height
 		if (legFrame.get(0).canAndShouldSupport()
 				|| legFrame.get(1).canAndShouldSupport()) {
 
-			float error; 
+			float error;
 			float vError;
 			float yForce;
-			if(hips){
-				error = sp.getHipHeightNow() - legFrame.get(0).getShoulderPosition().y;
-				vError = character.getRoot().getLinearVelocityFromWorldPoint(
-						legFrame.get(0).getShoulderPosition()).length();
-				yForce = Math.max(error * sp.getHipsVerticalKP()
-						- vError * sp.getHipsVerticalKD(), 0f);
+			if (hips) {
+				error = sp.getHipHeightNow()
+						- legFrame.get(0).getShoulderPosition().y;
+				vError = character
+						.getRoot()
+						.getLinearVelocityFromWorldPoint(
+								legFrame.get(0).getShoulderPosition()).length();
+				yForce = Math.max(
+						error * sp.getHipsVerticalKP() - vError
+								* sp.getHipsVerticalKD(), 0f);
+			} else {
+				error = sp.getShoulderHeightNow()
+						- legFrame.get(0).getShoulderPosition().y;
+				vError = character
+						.getRoot()
+						.getLinearVelocityFromWorldPoint(
+								legFrame.get(0).getShoulderPosition()).length();
+				yForce = Math.max(error * sp.getShouldersVerticalKP() - vError
+						* sp.getShouldersVerticalKD(), 0f);
 			}
-			else{
-				error = sp.getShoulderHeightNow() - legFrame.get(0).getShoulderPosition().y;
-				vError = character.getRoot().getLinearVelocityFromWorldPoint(
-						legFrame.get(0).getShoulderPosition()).length();
-				yForce = Math.max(error * sp.getShouldersVerticalKP()
-						- vError * sp.getShouldersVerticalKD(), 0f);
-			}
-
-			
-			
 
 			if (legFrame.get(0).canAndShouldSupport()) {
 				if (legFrame.get(1).canAndShouldSupport()) {
@@ -171,20 +217,20 @@ public class SPController extends PoseController {
 						lScale = 0f;
 					}
 
-					legFrame.get(1).addForceOnFoot(
-							f.mul(1 - lScale), virtualForces);
-					legFrame.get(0).addForceOnFoot(
-							f.mul(lScale), virtualForces);
+					legFrame.get(1).addForceOnFoot(f.mul(1 - lScale),
+							virtualForces);
+					legFrame.get(0)
+							.addForceOnFoot(f.mul(lScale), virtualForces);
 				} else {
 					// left arm only
-					legFrame.get(0).addForceOnFoot(
-							new Vec2(0f, -yForce), virtualForces);
+					legFrame.get(0).addForceOnFoot(new Vec2(0f, -yForce),
+							virtualForces);
 				}
 			} else {
 				// right arm only. Must be, since at least one is can/should
 				// support
-				legFrame.get(1).addForceOnFoot(new Vec2(
-						0f, -yForce), virtualForces);
+				legFrame.get(1).addForceOnFoot(new Vec2(0f, -yForce),
+						virtualForces);
 			}
 
 		}

@@ -74,4 +74,6 @@ public interface Character {
 
 		public float getTangentialForceOnLeg(float dt);
 	}
+
+	public float getTorsoLength();
 }

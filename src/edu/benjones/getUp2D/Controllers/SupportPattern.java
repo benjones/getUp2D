@@ -412,6 +412,27 @@ public class SupportPattern {
 	protected float hipsVerticalKD;
 	protected float shouldersVerticalKD;
 
+	// for simbicon style root control
+	protected float rootKP;
+
+	public float getRootKP() {
+		return rootKP;
+	}
+
+	public void setRootKP(float rootKP) {
+		this.rootKP = rootKP;
+	}
+
+	public float getRootKD() {
+		return rootKD;
+	}
+
+	public void setRootKD(float rootKD) {
+		this.rootKD = rootKD;
+	}
+
+	protected float rootKD;
+
 	public float getHipsVerticalKD() {
 		return hipsVerticalKD;
 	}
@@ -443,4 +464,5 @@ public class SupportPattern {
 	public void setShouldersVerticalKP(float shouldersVerticalKP) {
 		this.shouldersVerticalKP = shouldersVerticalKP;
 	}
+
 }

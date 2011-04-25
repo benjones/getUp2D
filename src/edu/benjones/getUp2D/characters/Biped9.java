@@ -554,4 +554,10 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		return defaultControlParams;
 	}
 
+	@Override
+	public float getTorsoLength() {
+
+		return hipTorsoOffset.sub(shoulderTorsoOffset).length();
+	}
+
 }
