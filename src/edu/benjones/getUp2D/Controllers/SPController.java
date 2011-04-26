@@ -26,6 +26,8 @@ public class SPController extends PoseController {
 
 	private ArrayList<SupportLimb> supportArms, supportLegs;
 
+	private float desiredXPosition;
+
 	public SPController(Character ch, SupportPatternGenerator g) {
 		super(ch);
 		sp = g.getPattern();
@@ -121,18 +123,28 @@ public class SPController extends PoseController {
 			float hipTorque = armTorque - desRootTorque;
 
 			List<Limb> legs = character.getLegs();
+			float simbiconBlend = sp.getSimbiconBlend();
 			if (supportLegs.get(0).canAndShouldSupport()) {
 				if (supportLegs.get(1).canAndShouldSupport()) {
-					torques[legs.get(0).getJointMap()
-							.get(legs.get(0).getBase())] = hipTorque * .5f;
-					torques[legs.get(1).getJointMap()
-							.get(legs.get(1).getBase())] = hipTorque * .5f;
+					int index0 = legs.get(0).getJointMap()
+							.get(legs.get(0).getBase());
+					int index1 = legs.get(1).getJointMap()
+							.get(legs.get(1).getBase());
+					torques[index0] = (hipTorque * .5f) * simbiconBlend
+							+ torques[index0] * (1 - simbiconBlend);
+					torques[index1] = (hipTorque * .5f) * simbiconBlend
+							+ torques[index1] * (1 - simbiconBlend);
 				} else {
-					torques[legs.get(0).getJointMap()
-							.get(legs.get(0).getBase())] = hipTorque;
+					int index0 = legs.get(0).getJointMap()
+							.get(legs.get(0).getBase());
+					torques[index0] = hipTorque * simbiconBlend
+							+ torques[index0] * (1 - simbiconBlend);
 				}
 			} else {
-				torques[legs.get(1).getJointMap().get(legs.get(1).getBase())] = hipTorque;
+				int index1 = legs.get(1).getJointMap()
+						.get(legs.get(1).getBase());
+				torques[index1] = hipTorque * simbiconBlend + torques[index1]
+						* (1 - simbiconBlend);
 			}
 
 		}
@@ -150,7 +162,36 @@ public class SPController extends PoseController {
 		legFrameHeightCorrection(supportArms, false);
 		legFrameHeightCorrection(supportLegs, true);
 
-		// same for hips
+		// now for a sagittal control
+		desiredXPosition = 0;
+		float weightSum = 0;
+		for (supportLabel limb : supportLabel.values()) {
+			if (limbs[limb.ordinal()].canAndShouldSupport()) {
+				float weight = Math.min(sp.getTimeToLift(limb), .5f);
+				weightSum += weight;
+				desiredXPosition += weight * limbs[limb.ordinal()].ikTarg.x;
+			}
+		}
+		if (weightSum > 0) {
+			desiredXPosition /= weightSum;
+
+			// we'll multiply the whole desired force by weighted sum, so
+			// it'll count for more when more limbs are planted
+			float sagErr = desiredXPosition
+					- character.getRoot().getPosition().x;
+			float sagVErr = character.getRoot().getLinearVelocity().x;
+
+			float totalForce = sp.getSagittalKP() * sagErr - sagVErr
+					* sp.getSagittalKD() * weightSum;
+
+			for (supportLabel limb : supportLabel.values()) {
+				if (limbs[limb.ordinal()].canAndShouldSupport()) {
+					limbs[limb.ordinal()].addForceOnFoot(new Vec2(-totalForce
+							* Math.min(sp.getTimeToLift(limb), .5f), 0f),
+							virtualForces);
+				}
+			}
+		}
 
 		for (VirtualForce v : virtualForces) {
 			v.apply();
@@ -256,6 +297,8 @@ public class SPController extends PoseController {
 		Vec2 desAngle = new Vec2(dx, dy);
 		desAngle.normalize();
 		g.drawSegment(desAngleStart, desAngleStart.add(desAngle), Color3f.WHITE);
+
+		g.drawCircle(new Vec2(desiredXPosition, -.04f), .03f, Color3f.WHITE);
 	}
 
 	@Override

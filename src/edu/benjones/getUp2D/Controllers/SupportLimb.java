@@ -23,7 +23,7 @@ public class SupportLimb {
 
 	protected Limb limb;
 	protected supportLabel limbLabel;
-	protected limbStatus lastStatus;
+	protected supportInfo lastInfo;
 
 	protected float plantedLevel;
 	private Trajectory1D heightTraj;
@@ -47,7 +47,7 @@ public class SupportLimb {
 	}
 
 	public void reset() {
-		this.lastStatus = limbStatus.idle;
+		this.lastInfo = new supportInfo(limbStatus.idle, false, 0f);
 		this.plantedLevel = 0;
 		swingBegin = new Vec2();
 		swingEnd = new Vec2();
@@ -67,7 +67,7 @@ public class SupportLimb {
 	}
 
 	public boolean canAndShouldSupport() {
-		return plantedLevel > 0f && this.lastStatus == limbStatus.stance;
+		return plantedLevel > 0f && this.lastInfo.ls == limbStatus.stance;
 	}
 
 	public boolean canRemoveSupport(float dt) {
@@ -88,14 +88,14 @@ public class SupportLimb {
 	public void setPose(limbPattern pattern, float phase, float[] desiredPose) {
 
 		supportInfo info = pattern.getInfoAtTime(phase);
-		if (info.ls != lastStatus) {
+		if (info.ls != lastInfo.ls || info.kneel != lastInfo.kneel) {
 			if (info.ls == limbStatus.swing) {
 				if (info.kneel) {
 					System.out.println("switched to swing kneel from "
-							+ lastStatus);
+							+ lastInfo.ls);
 					swingBegin = limb.getKneePosition();
 				} else {
-					System.out.println("switched to swing from " + lastStatus);
+					System.out.println("switched to swing from " + lastInfo.ls);
 					swingBegin = limb.getEndEffectorPosition();
 				}
 				swingEnd.x = limb.getBase().getAnchor2().x + info.xOffset;
@@ -114,7 +114,7 @@ public class SupportLimb {
 					swingEnd.y += .03 * ttl;
 				}
 			}
-			lastStatus = info.ls;
+			lastInfo = info;
 		}
 
 		// now do the work

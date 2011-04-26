@@ -412,8 +412,38 @@ public class SupportPattern {
 	protected float hipsVerticalKD;
 	protected float shouldersVerticalKD;
 
+	protected float sagittalKP;
+	protected float sagittalKD;
+
+	public float getSagittalKP() {
+		return sagittalKP;
+	}
+
+	public void setSagittalKP(float sagittalKP) {
+		this.sagittalKP = sagittalKP;
+	}
+
+	public float getSagittalKD() {
+		return sagittalKD;
+	}
+
+	public void setSagittalKD(float sagittalKD) {
+		this.sagittalKD = sagittalKD;
+	}
+
 	// for simbicon style root control
 	protected float rootKP;
+
+	protected float simbiconBlend;// what percentage of hip torques should come
+									// from simbicon
+
+	public float getSimbiconBlend() {
+		return simbiconBlend;
+	}
+
+	public void setSimbiconBlend(float simbiconBlend) {
+		this.simbiconBlend = simbiconBlend;
+	}
 
 	public float getRootKP() {
 		return rootKP;

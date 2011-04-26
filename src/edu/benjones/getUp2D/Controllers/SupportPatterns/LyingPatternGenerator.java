@@ -17,11 +17,16 @@ public class LyingPatternGenerator implements SupportPatternGenerator {
 		sp.setHipsVerticalKP(900f);
 		sp.setHipsVerticalKD(80f);
 
-		sp.setShouldersVerticalKP(500f);
+		sp.setShouldersVerticalKP(600f);
 		sp.setShouldersVerticalKD(50f);
 
-		sp.setRootKP(800f);
-		sp.setRootKD(80f);
+		sp.setSagittalKP(200);
+		sp.setSagittalKD(20);
+
+		sp.setRootKP(500f);
+		sp.setRootKD(50f);
+
+		sp.setSimbiconBlend(.30f);
 
 		sp.addLimbStatus(supportLabel.leftArm, 1.0f, new supportInfo(
 				limbStatus.swing, false, 0.15f));
@@ -58,14 +63,27 @@ public class LyingPatternGenerator implements SupportPatternGenerator {
 		sp.addLimbStatus(supportLabel.leftLeg, 12.0f, new supportInfo(
 				limbStatus.stance, false, 0f));
 
+		sp.addLimbStatus(supportLabel.rightLeg, 12.5f, new supportInfo(
+				limbStatus.stance, false, 0f));
+
+		sp.addLimbStatus(supportLabel.leftArm, 14.0f, new supportInfo(
+				limbStatus.idle, false, 0f));
+
+		sp.addLimbStatus(supportLabel.rightArm, 14.0f, new supportInfo(
+				limbStatus.idle, false, 0f));
+
 		sp.addShoulderHeightKnot(new entry(3.5f, 0.05f));
 		sp.addShoulderHeightKnot(new entry(6.0f, .2f));
-		sp.addShoulderHeightKnot(new entry(8.0f, .4f));
-		sp.addShoulderHeightKnot(new entry(9.0f, .55f));
+		sp.addShoulderHeightKnot(new entry(8.0f, .45f));
+		sp.addShoulderHeightKnot(new entry(9.0f, .45f));
+		sp.addShoulderHeightKnot(new entry(13.0f, .5f));
+		sp.addShoulderHeightKnot(new entry(14.5f, .9f));
 
 		sp.addHipHeightKnot(new entry(3.5f, 0.05f));
 		sp.addHipHeightKnot(new entry(7.0f, .35f));
 		sp.addHipHeightKnot(new entry(9.0f, .45f));
+		sp.addHipHeightKnot(new entry(12.5f, .45f));
+		sp.addHipHeightKnot(new entry(14.0f, .55f));
 
 		return sp;
 	}
