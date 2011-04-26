@@ -49,6 +49,10 @@ public class getUpMain extends PApplet {
 							.getDrawDesiredPose());
 				} else if (e.getKeyChar() == 'p') {
 					paused = !paused;
+				} else if (e.getKeyChar() == '+') {
+					getUpScenario.increaseSimSpeed();
+				} else if (e.getKeyChar() == '-') {
+					getUpScenario.decreaseSimSpeed();
 				}
 
 			}

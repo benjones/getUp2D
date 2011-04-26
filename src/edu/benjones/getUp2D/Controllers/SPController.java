@@ -3,6 +3,7 @@ package edu.benjones.getUp2D.Controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jbox2d.common.Color3f;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.DebugDraw;
 import org.jbox2d.dynamics.World;
@@ -248,6 +249,13 @@ public class SPController extends PoseController {
 			v.draw(g);
 		}
 
+		float dx = character.getTorsoLength();
+		float dy = sp.getShoulderHeightNow() - sp.getHipHeightNow();
+		Vec2 desAngleStart = character.getRoot().getPosition()
+				.add(new Vec2(0f, 1f));
+		Vec2 desAngle = new Vec2(dx, dy);
+		desAngle.normalize();
+		g.drawSegment(desAngleStart, desAngleStart.add(desAngle), Color3f.WHITE);
 	}
 
 	@Override

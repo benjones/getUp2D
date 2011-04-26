@@ -7,6 +7,7 @@ import org.jbox2d.collision.ContactID;
 import org.jbox2d.collision.Segment;
 import org.jbox2d.collision.shapes.PolygonDef;
 import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.common.Color3f;
 import org.jbox2d.common.RaycastResult;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -66,6 +67,8 @@ public class GetUpScenario {
 
 	private static Body ground;
 
+	protected float simSpeed;
+
 	public GetUpScenario(DebugDraw g) {
 		setupInitialPosition();
 		if (contactMap == null)
@@ -78,6 +81,7 @@ public class GetUpScenario {
 		drawDesiredPose = true;// false;
 		desiredPoseSetup = false;
 		drawControllerExtras = true;
+		simSpeed = 1.0f;
 		debugDraw = g;
 		createWorld();
 		setupCharacter();
@@ -151,6 +155,14 @@ public class GetUpScenario {
 		desiredPoseSetup = true;
 	}
 
+	public void increaseSimSpeed() {
+		simSpeed *= 2;
+	}
+
+	public void decreaseSimSpeed() {
+		simSpeed /= 2f;
+	}
+
 	public void step() {
 
 		debugDraw.setFlags(0);
@@ -165,7 +177,7 @@ public class GetUpScenario {
 			b.m_torque = 0f;
 		}
 		// playback speed
-		float timestep = (float) (1.0 / framerate) * .25f;
+		float timestep = (float) (1.0 / framerate) * simSpeed;
 		// drawing gets done here I guess?
 		controller.computeTorques(world, timestep);
 
@@ -186,6 +198,9 @@ public class GetUpScenario {
 
 		if (drawControllerExtras) {
 			controller.drawControllerExtras(debugDraw);
+
+			debugDraw.drawString(600, 50, "SimSpeed: " + simSpeed,
+					Color3f.WHITE);
 		}
 		// debugDraw.drawString(5, 12, "test", new Color3f(255f, 255f, 255f));
 
