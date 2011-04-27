@@ -13,6 +13,7 @@ import edu.benjones.getUp2D.Character.Limb;
 import edu.benjones.getUp2D.Controllers.SupportPattern.limbStatus;
 import edu.benjones.getUp2D.Controllers.SupportPattern.supportInfo;
 import edu.benjones.getUp2D.Controllers.SupportPattern.supportLabel;
+import edu.benjones.getUp2D.Controllers.SupportPatterns.ParameterizedSupportPatternGenerator;
 import edu.benjones.getUp2D.Controllers.SupportPatterns.SupportPatternGenerator;
 import edu.benjones.getUp2D.Utils.PhysicsUtils;
 
@@ -32,6 +33,17 @@ public class SPController extends PoseController {
 	public SPController(Character ch, SupportPatternGenerator g) {
 		super(ch);
 		sp = g.getPattern();
+		controllerSetup();
+	}
+
+	public SPController(Character ch, ParameterizedSupportPatternGenerator g,
+			float[] parameters) {
+		super(ch);
+		sp = g.getPattern(parameters);
+		controllerSetup();
+	}
+
+	private void controllerSetup() {
 		List<Limb> arms = character.getArms();
 		List<Limb> legs = character.getLegs();
 		limbs = new SupportLimb[SupportPattern.supportLabel.values().length];
