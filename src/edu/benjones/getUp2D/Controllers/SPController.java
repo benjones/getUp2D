@@ -14,6 +14,7 @@ import edu.benjones.getUp2D.Controllers.SupportPattern.limbStatus;
 import edu.benjones.getUp2D.Controllers.SupportPattern.supportInfo;
 import edu.benjones.getUp2D.Controllers.SupportPattern.supportLabel;
 import edu.benjones.getUp2D.Controllers.SupportPatterns.SupportPatternGenerator;
+import edu.benjones.getUp2D.Utils.PhysicsUtils;
 
 public class SPController extends PoseController {
 
@@ -101,13 +102,21 @@ public class SPController extends PoseController {
 		super.computeTorquesOnly(w, dt);
 
 		// simbicon style feedback
-		if (supportLegs.get(0).canAndShouldSupport()
-				|| supportLegs.get(1).canAndShouldSupport()) {
+		// if (supportLegs.get(0).canAndShouldSupport()
+		// || supportLegs.get(1).canAndShouldSupport()) {
+		// List<Limb> legs = character.getLegs();
+		ArrayList<Limb> simbiconLimbs = new ArrayList<Limb>();
+		for (SupportLimb sl : limbs) {
+			if (sl.canAndShouldSupport()) {
+				simbiconLimbs.add(sl.limb);
+			}
+		}
+		if (simbiconLimbs.size() > 0) {
+			float tl = character.getTorsoLength();
+			float dy = Math.min(
+					sp.getShoulderHeightNow() - sp.getHipHeightNow(), tl);
 
-			float dx = character.getTorsoLength();
-			float dy = sp.getShoulderHeightNow() - sp.getHipHeightNow();
-
-			float desAngle = (float) (Math.atan2(dy, dx) - Math.PI / 2);
+			float desAngle = (float) (Math.asin(dy / tl) - Math.PI / 2);
 
 			// torque the root WANTS to see
 			float desRootTorque = sp.getRootKP()
@@ -120,34 +129,47 @@ public class SPController extends PoseController {
 				armTorque -= torques[arm.getJointMap().get(arm.getBase())];
 			}
 
-			float hipTorque = armTorque - desRootTorque;
-
-			List<Limb> legs = character.getLegs();
-			float simbiconBlend = sp.getSimbiconBlend();
-			if (supportLegs.get(0).canAndShouldSupport()) {
-				if (supportLegs.get(1).canAndShouldSupport()) {
-					int index0 = legs.get(0).getJointMap()
-							.get(legs.get(0).getBase());
-					int index1 = legs.get(1).getJointMap()
-							.get(legs.get(1).getBase());
-					torques[index0] = (hipTorque * .5f) * simbiconBlend
-							+ torques[index0] * (1 - simbiconBlend);
-					torques[index1] = (hipTorque * .5f) * simbiconBlend
-							+ torques[index1] * (1 - simbiconBlend);
-				} else {
-					int index0 = legs.get(0).getJointMap()
-							.get(legs.get(0).getBase());
-					torques[index0] = hipTorque * simbiconBlend
-							+ torques[index0] * (1 - simbiconBlend);
-				}
-			} else {
-				int index1 = legs.get(1).getJointMap()
-						.get(legs.get(1).getBase());
-				torques[index1] = hipTorque * simbiconBlend + torques[index1]
-						* (1 - simbiconBlend);
+			float legTorque = 0;
+			for (Limb leg : character.getLegs()) {
+				legTorque -= torques[leg.getJointMap().get(leg.getBase())];
 			}
 
+			// this is the difference between what torque the root gets vs
+			// what it wants to get
+			float rootTorqueError = desRootTorque - armTorque - legTorque;
+
+			rootTorqueError = Math.max(
+					-simbiconLimbs.size() * sp.getMaxRootCorrectionTorque(),
+					Math.min(
+							simbiconLimbs.size()
+									* sp.getMaxRootCorrectionTorque(),
+							rootTorqueError));
+			for (Limb l : simbiconLimbs) {
+				torques[l.getJointMap().get(l.getBase())] -= rootTorqueError
+						/ simbiconLimbs.size();
+			}
 		}
+		/*
+		 * if (supportLegs.get(0).canAndShouldSupport()) { if
+		 * (supportLegs.get(1).canAndShouldSupport()) { int index0 =
+		 * legs.get(0).getJointMap() .get(legs.get(0).getBase()); int index1 =
+		 * legs.get(1).getJointMap() .get(legs.get(1).getBase()); // clamp
+		 * rootTorqueError rootTorqueError = Math.max( -2 *
+		 * sp.getMaxRootCorrectionTorque(), Math.min( 2 *
+		 * sp.getMaxRootCorrectionTorque(), rootTorqueError)); torques[index0]
+		 * -= rootTorqueError * .5f; torques[index1] -= rootTorqueError * .5f; }
+		 * else { int index0 = legs.get(0).getJointMap()
+		 * .get(legs.get(0).getBase()); rootTorqueError = Math.max(
+		 * -sp.getMaxRootCorrectionTorque(), Math.min(
+		 * sp.getMaxRootCorrectionTorque(), rootTorqueError)); torques[index0]
+		 * -= rootTorqueError; } } else { int index1 = legs.get(1).getJointMap()
+		 * .get(legs.get(1).getBase()); rootTorqueError =
+		 * Math.max(-sp.getMaxRootCorrectionTorque(),
+		 * Math.min(sp.getMaxRootCorrectionTorque(), rootTorqueError));
+		 * torques[index1] -= rootTorqueError; }
+		 */
+
+		// }
 
 		super.applyTorques();
 
@@ -169,7 +191,13 @@ public class SPController extends PoseController {
 			if (limbs[limb.ordinal()].canAndShouldSupport()) {
 				float weight = Math.min(sp.getTimeToLift(limb), .5f);
 				weightSum += weight;
-				desiredXPosition += weight * limbs[limb.ordinal()].ikTarg.x;
+				// desiredXPosition += weight * limbs[limb.ordinal()].ikTarg.x;
+				// use the COM of the end effector as the indicator
+				desiredXPosition += weight
+						* PhysicsUtils
+								.getChildJoint(
+										limbs[limb.ordinal()].limb.getBase())
+								.getBody2().getPosition().x;
 			}
 		}
 		if (weightSum > 0) {

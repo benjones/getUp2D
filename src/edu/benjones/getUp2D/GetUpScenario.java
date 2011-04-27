@@ -56,7 +56,8 @@ public class GetUpScenario {
 	private AABB worldAABB;
 	// create()
 
-	public static final float framerate = 300;
+	public static final float framerate = 60;
+	public static final float physicsFramerate = framerate * 5.0f;
 	public static final int iterationCount = 10;
 
 	private boolean drawContactPoints;
@@ -110,6 +111,7 @@ public class GetUpScenario {
 		// setup ground
 		PolygonDef sd = new PolygonDef();
 		sd.setAsBox(50f, 5f);
+		sd.friction = .8f;
 
 		BodyDef bd = new BodyDef();
 		bd.position.set(0f, -5f);
@@ -164,7 +166,13 @@ public class GetUpScenario {
 	}
 
 	public void step() {
+		// this will get weird if this is not an integer!!!
+		for (int i = 0; i < simSpeed * physicsFramerate / framerate; ++i)
+			physicsStep();
 
+	}
+
+	private void physicsStep() {
 		debugDraw.setFlags(0);
 		// debugDraw.appendFlags(DebugDraw.e_aabbBit);
 		// debugDraw.appendFlags(DebugDraw.e_coreShapeBit);
@@ -177,7 +185,7 @@ public class GetUpScenario {
 			b.m_torque = 0f;
 		}
 		// playback speed
-		float timestep = (float) (1.0 / framerate) * simSpeed;
+		float timestep = (float) (1.0 / physicsFramerate);
 		// drawing gets done here I guess?
 		controller.computeTorques(world, timestep);
 
@@ -208,7 +216,6 @@ public class GetUpScenario {
 		contactMap.clear();
 
 		world.step(timestep, iterationCount);
-
 	}
 
 	public void setDrawContactPoints(boolean drawContactPoints) {

@@ -20,6 +20,8 @@ public class getUpMain extends PApplet {
 
 	private boolean doReset;
 
+	// private MovieMaker mm;
+
 	public getUpMain() {
 		super();
 	}
@@ -53,6 +55,9 @@ public class getUpMain extends PApplet {
 					getUpScenario.increaseSimSpeed();
 				} else if (e.getKeyChar() == '-') {
 					getUpScenario.decreaseSimSpeed();
+				} else if (e.getKeyChar() == 's') {
+					System.out.println("saving frame: " + frameCount);
+					saveFrame();
 				}
 
 			}

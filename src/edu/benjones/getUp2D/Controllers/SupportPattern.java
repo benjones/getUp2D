@@ -434,15 +434,18 @@ public class SupportPattern {
 	// for simbicon style root control
 	protected float rootKP;
 
-	protected float simbiconBlend;// what percentage of hip torques should come
-									// from simbicon
+	protected float maxRootCorrectionTorque;// what percentage of hip torques
+											// should come
 
-	public float getSimbiconBlend() {
-		return simbiconBlend;
+	// from simbicon
+
+	// how much root torque error should we try to correct?
+	public float getMaxRootCorrectionTorque() {
+		return maxRootCorrectionTorque;
 	}
 
-	public void setSimbiconBlend(float simbiconBlend) {
-		this.simbiconBlend = simbiconBlend;
+	public void setMaxRootCorrectionTorque(float simbiconBlend) {
+		this.maxRootCorrectionTorque = simbiconBlend;
 	}
 
 	public float getRootKP() {

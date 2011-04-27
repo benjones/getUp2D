@@ -116,6 +116,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		lowerArmPolyDef.setAsBox(.041f, .13f);
 		lowerArmPolyDef.density = limbDensity;
 		lowerArmPolyDef.filter.groupIndex = filterGroup;
+		lowerArmPolyDef.friction = .3f;
 
 		leftLowerArm = w.createBody(lowerArmDef);
 		leftLowerArm.createShape(lowerArmPolyDef);
@@ -186,6 +187,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		lowerLegPolyDef.setAsBox(.041f, .16f);
 		lowerLegPolyDef.density = limbDensity;
 		lowerLegPolyDef.filter.groupIndex = filterGroup;
+		lowerLegPolyDef.friction = .8f;
 
 		leftLowerLeg = w.createBody(lowerLegDef);
 		leftLowerLeg.createShape(lowerLegPolyDef);

@@ -74,7 +74,7 @@ public class SupportLimb {
 		float tangential = limb.getTangentialForceOnLeg(dt);
 		float normal = limb.getNormalForceOnLeg(dt);
 		float f = (tangential + normal);
-		if (f >= 20) {
+		if (f >= 30) {
 			System.out.println("force preventing lift, normal:" + normal
 					+ " tangential: " + tangential);
 		}
@@ -111,7 +111,7 @@ public class SupportLimb {
 				// if its lifting soon, shift weight to other limb
 				float ttl = parent.getTimeToLift(limbLabel);
 				if (ttl < .5) {
-					swingEnd.y += .03 * ttl;
+					swingEnd.y += .04 * ttl;
 				}
 			}
 			lastInfo = info;
