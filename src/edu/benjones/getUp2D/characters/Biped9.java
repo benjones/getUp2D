@@ -51,9 +51,10 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 	protected ArrayList<ControlParam> defaultControlParams;
 
 	protected World world;
+	protected GetUpScenario scenario;
 
-	public Biped9(World w) {
-
+	public Biped9(World w, GetUpScenario scenario) {
+		this.scenario = scenario;
 		world = w;
 
 		shoulderTorsoOffset = new Vec2(.0f, .18f);
@@ -254,14 +255,14 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		arms = new ArrayList<Limb>();
 		legs = new ArrayList<Limb>();
 		arms.add(new Bip9Limb(leftShoulder, leftLowerArm, armEEOffset, false,
-				leftArmMap));
+				leftArmMap, this));
 		arms.add(new Bip9Limb(rightShoulder, rightLowerArm, armEEOffset, false,
-				rightArmMap));
+				rightArmMap, this));
 
 		legs.add(new Bip9Limb(leftHip, leftLowerLeg, legEEOffset, true,
-				leftLegMap));
+				leftLegMap, this));
 		legs.add(new Bip9Limb(rightHip, rightLowerLeg, legEEOffset, true,
-				rightLegMap));
+				rightLegMap, this));
 
 		defaultControlParams = new ArrayList<ControlParam>();
 		ControlParam hip, shoulder, knee, elbow;
@@ -348,12 +349,12 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		return joints;
 	}
 
-	public static Character makeCharacter(World w) {
-		return new Biped9(w);
+	public static Character makeCharacter(World w, GetUpScenario scenario) {
+		return new Biped9(w, scenario);
 	}
 
-	public static Character getStaticCharacter(World w) {
-		Character ret = makeCharacter(w);
+	public static Character getStaticCharacter(World w, GetUpScenario scenario) {
+		Character ret = makeCharacter(w, scenario);
 		// for (Body b : ret.getBodies())
 		// b.setMass(new MassData());
 		return ret;
@@ -364,6 +365,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		protected Body endEffector;
 		protected Vec2 eeOffset;
 		protected boolean posAngle;
+		protected Character character;
 
 		protected HashMap<RevoluteJoint, Integer> jointMap;
 
@@ -385,12 +387,14 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		 *            map of joint to indeces in the joint array
 		 */
 		private Bip9Limb(RevoluteJoint hip, Body endEffector, Vec2 eeOffset,
-				boolean posAngle, HashMap<RevoluteJoint, Integer> jointMap) {
+				boolean posAngle, HashMap<RevoluteJoint, Integer> jointMap,
+				Character character) {
 			this.hip = hip;
 			this.endEffector = endEffector;
 			this.eeOffset = eeOffset;
 			this.posAngle = posAngle;
 			this.jointMap = jointMap;
+			this.character = character;
 
 			l1 = hip.getAnchor2()
 					.sub(PhysicsUtils.getChildJoint(hip).getAnchor1()).length();
@@ -483,7 +487,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		@Override
 		public float getNormalForceOnLeg(float dt) {
 			float force = 0f;
-			HashMap<ContactID, ContactResult> contactMap = GetUpScenario
+			HashMap<ContactID, ContactResult> contactMap = scenario
 					.getContactMap();
 
 			for (Body b : getBodies()) {
@@ -500,7 +504,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		@Override
 		public float getTangentialForceOnLeg(float dt) {
 			float force = 0f;
-			HashMap<ContactID, ContactResult> contactMap = GetUpScenario
+			HashMap<ContactID, ContactResult> contactMap = scenario
 					.getContactMap();
 			for (Body b : getBodies()) {
 				for (ContactResult cr : contactMap.values()) {
@@ -539,6 +543,11 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		public Vec2 getKneePosition() {
 			return PhysicsUtils.getChildJoint(hip).getAnchor1();
 		}
+
+		@Override
+		public Character getCharacter() {
+			return character;
+		}
 	}
 
 	@Override
@@ -560,6 +569,11 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 	public float getTorsoLength() {
 
 		return hipTorsoOffset.sub(shoulderTorsoOffset).length();
+	}
+
+	@Override
+	public GetUpScenario getScenario() {
+		return scenario;
 	}
 
 }

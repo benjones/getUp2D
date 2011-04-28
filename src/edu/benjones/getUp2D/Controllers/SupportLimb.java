@@ -10,7 +10,6 @@ import org.jbox2d.dynamics.DebugDraw;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 
 import edu.benjones.getUp2D.Character.Limb;
-import edu.benjones.getUp2D.GetUpScenario;
 import edu.benjones.getUp2D.Controllers.SupportPattern.limbPattern;
 import edu.benjones.getUp2D.Controllers.SupportPattern.limbStatus;
 import edu.benjones.getUp2D.Controllers.SupportPattern.supportInfo;
@@ -99,7 +98,8 @@ public class SupportLimb {
 					swingBegin = limb.getEndEffectorPosition();
 				}
 				swingEnd.x = limb.getBase().getAnchor2().x + info.xOffset;
-				swingEnd.y = GetUpScenario.getGroundHeightAt(swingEnd.x);
+				swingEnd.y = limb.getCharacter().getScenario()
+						.getGroundHeightAt(swingEnd.x);
 				halfwayDone = false;
 			} else if (info.ls == limbStatus.stance) {
 				if (info.kneel) {
@@ -107,7 +107,8 @@ public class SupportLimb {
 				} else {
 					swingEnd.x = limb.getEndEffectorPosition().x;
 				}
-				swingEnd.y = GetUpScenario.getGroundHeightAt(swingEnd.x);
+				swingEnd.y = limb.getCharacter().getScenario()
+						.getGroundHeightAt(swingEnd.x);
 				// if its lifting soon, shift weight to other limb
 				float ttl = parent.getTimeToLift(limbLabel);
 				if (ttl < .5) {
@@ -127,17 +128,20 @@ public class SupportLimb {
 				halfwayDone = true;
 				// reset the ik target to handle movement by the base
 				swingEnd.x = limb.getBase().getAnchor2().x + info.xOffset;
-				swingEnd.y = GetUpScenario.getGroundHeightAt(swingEnd.x);
+				swingEnd.y = limb.getCharacter().getScenario()
+						.getGroundHeightAt(swingEnd.x);
 			}
 
 			// now set up the iktarget
 			ikTarg = swingBegin.mul(1 - swingPhase).add(
 					swingEnd.mul(swingPhase));
-			ikTarg.y = GetUpScenario.getGroundHeightAt(ikTarg.x)
+			ikTarg.y = limb.getCharacter().getScenario()
+					.getGroundHeightAt(ikTarg.x)
 					+ heightTraj.evaluateLinear(swingPhase);
 		} else if (info.ls == limbStatus.stance) {
 			ikTarg = swingEnd;
-			ikTarg.y = GetUpScenario.getGroundHeightAt(ikTarg.x);
+			ikTarg.y = limb.getCharacter().getScenario()
+					.getGroundHeightAt(ikTarg.x);
 			float desHeight;
 			if (limbLabel == supportLabel.leftLeg
 					|| limbLabel == supportLabel.rightLeg) {

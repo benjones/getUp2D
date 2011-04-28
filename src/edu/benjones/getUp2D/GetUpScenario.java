@@ -27,7 +27,7 @@ import edu.benjones.getUp2D.characters.Biped9;
 
 public class GetUpScenario {
 
-	protected static HashMap<ContactID, ContactResult> contactMap;
+	protected HashMap<ContactID, ContactResult> contactMap;
 
 	public static final class defaultCameraParams {
 		public final static float x = 0f;
@@ -51,7 +51,7 @@ public class GetUpScenario {
 
 	public DebugDraw debugDraw;
 
-	protected static World world;
+	protected World world;
 	protected Character character, desiredPoseCharacter;
 	protected Controller controller;
 	private AABB worldAABB;
@@ -63,11 +63,11 @@ public class GetUpScenario {
 
 	private boolean drawContactPoints;
 
-	private boolean drawDesiredPose;
+	protected boolean drawDesiredPose;
 	private boolean drawControllerExtras;
 	private boolean desiredPoseSetup;
 
-	private static Body ground;
+	private Body ground;
 
 	protected float simSpeed;
 
@@ -103,11 +103,8 @@ public class GetUpScenario {
 		if (world != null)
 			System.out.println("WARNING: World not null in createWorld");
 		world = new World(worldAABB, gravity, false);
-		world.setDebugDraw(debugDraw);
-		setDrawContactPoints(false);
 
-		debugDraw.setCamera(defaultCameraParams.x, defaultCameraParams.y,
-				defaultCameraParams.scale);
+		setupCamera();
 
 		// setup ground
 		PolygonDef sd = new PolygonDef();
@@ -140,8 +137,15 @@ public class GetUpScenario {
 
 	}
 
+	protected void setupCamera() {
+		world.setDebugDraw(debugDraw);
+		setDrawContactPoints(false);
+		debugDraw.setCamera(defaultCameraParams.x, defaultCameraParams.y,
+				defaultCameraParams.scale);
+	}
+
 	public void setupCharacter() {
-		character = new Biped9(world);
+		character = new Biped9(world, this);
 		float[] zeros = new float[character.getStateSize()];
 		character.setState(new Vec2(originalPosition.x, originalPosition.y),
 				originalPosition.angle, zeros);
@@ -159,7 +163,7 @@ public class GetUpScenario {
 	}
 
 	public void setupDesiredPoseCharacter() {
-		desiredPoseCharacter = Biped9.getStaticCharacter(world);
+		desiredPoseCharacter = Biped9.getStaticCharacter(world, this);
 		desiredPoseSetup = true;
 	}
 
@@ -248,7 +252,7 @@ public class GetUpScenario {
 		return drawControllerExtras;
 	}
 
-	public static HashMap<ContactID, ContactResult> getContactMap() {
+	public HashMap<ContactID, ContactResult> getContactMap() {
 		return contactMap;
 	}
 
@@ -262,7 +266,7 @@ public class GetUpScenario {
 	private static RaycastResult testRayResult;
 
 	// TODO TEST THIS METHOD!!!!
-	public static float getGroundHeightAt(float x) {
+	public float getGroundHeightAt(float x) {
 		if (testRay == null) {
 			testRay = new Segment();
 			testRay.p1.y = 1000f;

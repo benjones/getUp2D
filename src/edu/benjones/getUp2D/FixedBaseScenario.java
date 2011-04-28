@@ -21,7 +21,7 @@ public class FixedBaseScenario extends GetUpScenario {
 
 	@Override
 	public void setupCharacter() {
-		character = new Biped9FixedBase(world);
+		character = new Biped9FixedBase(world, this);
 		float[] zeros = new float[character.getStateSize()];
 		character.setState(new Vec2(originalPosition.x, originalPosition.y),
 				originalPosition.angle, zeros);

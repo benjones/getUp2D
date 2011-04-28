@@ -73,7 +73,11 @@ public interface Character {
 		public float getNormalForceOnLeg(float dt);
 
 		public float getTangentialForceOnLeg(float dt);
+
+		public Character getCharacter();
 	}
 
 	public float getTorsoLength();
+
+	public GetUpScenario getScenario();
 }
