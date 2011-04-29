@@ -27,6 +27,7 @@ public class ControlParam {
 
 	public void scale(float alpha) {
 		this.kp *= alpha;
-		this.kd *= alpha;
+		// don't scale kd
+		this.kd *= alpha * 2;
 	}
 }

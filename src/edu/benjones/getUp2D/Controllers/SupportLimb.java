@@ -73,10 +73,7 @@ public class SupportLimb {
 		float tangential = limb.getTangentialForceOnLeg(dt);
 		float normal = limb.getNormalForceOnLeg(dt);
 		float f = (tangential + normal);
-		if (f >= 30) {
-			System.out.println("force preventing lift, normal:" + normal
-					+ " tangential: " + tangential);
-		}
+
 		return f < 30;
 	}
 
@@ -90,11 +87,10 @@ public class SupportLimb {
 		if (info.ls != lastInfo.ls || info.kneel != lastInfo.kneel) {
 			if (info.ls == limbStatus.swing) {
 				if (info.kneel) {
-					System.out.println("switched to swing kneel from "
-							+ lastInfo.ls);
+
 					swingBegin = limb.getKneePosition();
 				} else {
-					System.out.println("switched to swing from " + lastInfo.ls);
+
 					swingBegin = limb.getEndEffectorPosition();
 				}
 				swingEnd.x = limb.getBase().getAnchor2().x + info.xOffset;

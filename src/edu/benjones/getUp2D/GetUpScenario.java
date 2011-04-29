@@ -64,7 +64,7 @@ public class GetUpScenario {
 	private boolean drawContactPoints;
 
 	protected boolean drawDesiredPose;
-	private boolean drawControllerExtras;
+	protected boolean drawControllerExtras;
 	private boolean desiredPoseSetup;
 
 	private Body ground;
@@ -91,7 +91,7 @@ public class GetUpScenario {
 	}
 
 	public void setupInitialPosition() {
-		originalPosition = new OriginalPosition(0f, 1f, (float) -(Math.PI / 2));
+		originalPosition = new OriginalPosition(0f, .5f, (float) -(Math.PI / 2));
 	}
 
 	public void createWorld() {
@@ -182,13 +182,14 @@ public class GetUpScenario {
 
 	}
 
-	private void physicsStep() {
-		debugDraw.setFlags(0);
-		// debugDraw.appendFlags(DebugDraw.e_aabbBit);
-		// debugDraw.appendFlags(DebugDraw.e_coreShapeBit);
-		debugDraw.appendFlags(DebugDraw.e_shapeBit);
-		debugDraw.appendFlags(DebugDraw.e_jointBit);
-
+	protected void physicsStep() {
+		if (debugDraw != null) {
+			debugDraw.setFlags(0);
+			// debugDraw.appendFlags(DebugDraw.e_aabbBit);
+			// debugDraw.appendFlags(DebugDraw.e_coreShapeBit);
+			debugDraw.appendFlags(DebugDraw.e_shapeBit);
+			debugDraw.appendFlags(DebugDraw.e_jointBit);
+		}
 		// rolling my own clear forces:
 		for (Body b = world.getBodyList(); b != null; b = b.getNext()) {
 			b.m_force.setZero();
@@ -293,7 +294,8 @@ public class GetUpScenario {
 		float[] zeros = new float[character.getStateSize()];
 		character.setState(new Vec2(originalPosition.x, originalPosition.y),
 				originalPosition.angle, zeros);
-		controller.reset();
+		if (controller != null)
+			controller.reset();
 	}
 
 }

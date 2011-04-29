@@ -77,7 +77,7 @@ public class ParameterizedLyingGenerator implements
 	public SupportPattern getPattern(float[] parameters) {
 		SupportPattern sp = new SupportPattern();
 
-		System.out.println(parameters.length);
+		// System.out.println(parameters.length);
 		assert (parameters.length == lyingParamOffsets.values().length);
 
 		sp.setIdleModifier(parameters[lyingParamOffsets.idleModifier.ordinal()]);

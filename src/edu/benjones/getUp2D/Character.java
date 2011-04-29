@@ -46,6 +46,8 @@ public interface Character {
 
 	public List<RevoluteJoint> getJoints();
 
+	public HashMap<RevoluteJoint, Integer> getJointMap();
+
 	public List<Limb> getArms();
 
 	public List<Limb> getLegs();

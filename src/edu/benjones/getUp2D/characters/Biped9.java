@@ -45,6 +45,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 
 	protected ArrayList<Body> bodies;
 	protected ArrayList<RevoluteJoint> joints;
+	protected HashMap<RevoluteJoint, Integer> jointMap;
 	protected ArrayList<Limb> arms;
 	protected ArrayList<Limb> legs;
 
@@ -235,6 +236,11 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		joints.add(rightHip);
 		joints.add(leftKnee);
 		joints.add(rightKnee);
+
+		jointMap = new HashMap<RevoluteJoint, Integer>();
+		for (RevoluteJoint j : joints) {
+			jointMap.put(j, joints.indexOf(j));
+		}
 
 		HashMap<RevoluteJoint, Integer> leftLegMap, rightLegMap, leftArmMap, rightArmMap;
 		leftLegMap = new HashMap<RevoluteJoint, Integer>();
@@ -447,10 +453,12 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 					1.0f);
 
 			float kneePre = (float) Math.acos(det);
+
 			float kneeAngle = (float) (kneePre - Math.PI);
 
 			// angle between relVec and the desired link1
-			float theta1 = (float) Math.asin(l2 * Math.sin(kneePre) / l3);
+			float theta1 = (float) Math.asin(Math.min(l2 * Math.sin(kneePre)
+					/ l3, 1.0f));
 
 			// global angle of relVec
 			float thetav = (float) Math.atan2(relVec.y, relVec.x);
@@ -574,6 +582,11 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 	@Override
 	public GetUpScenario getScenario() {
 		return scenario;
+	}
+
+	@Override
+	public HashMap<RevoluteJoint, Integer> getJointMap() {
+		return jointMap;
 	}
 
 }

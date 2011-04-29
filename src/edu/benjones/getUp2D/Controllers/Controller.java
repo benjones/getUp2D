@@ -12,4 +12,13 @@ public interface Controller {
 	public void drawControllerExtras(DebugDraw g);
 
 	public void reset();
+
+	public float getEndTime();
+
+	/**
+	 * get the torques the controller applied last frame
+	 * 
+	 * @return
+	 */
+	public float[] getTorques();
 }

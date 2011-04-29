@@ -45,6 +45,7 @@ public class PoseController extends AbstractController {
 		List<RevoluteJoint> joints = character.getJoints();
 		RevoluteJoint j;
 		for (int i = 0; i < torques.length; ++i) {
+
 			j = joints.get(i);
 			// apply + torque to child, and -torque to parent
 			j.getBody1().applyTorque(-torques[i]);
@@ -94,5 +95,10 @@ public class PoseController extends AbstractController {
 	public void reset() {
 		// don't think there's anything to do here
 
+	}
+
+	@Override
+	public float[] getTorques() {
+		return torques;
 	}
 }

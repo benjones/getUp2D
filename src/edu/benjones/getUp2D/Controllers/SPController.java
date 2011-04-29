@@ -126,7 +126,8 @@ public class SPController extends PoseController {
 		if (simbiconLimbs.size() > 0) {
 			float tl = character.getTorsoLength();
 			float dy = Math.min(
-					sp.getShoulderHeightNow() - sp.getHipHeightNow(), tl);
+					sp.getShoulderHeightNow() - sp.getHipHeightNow(),
+					tl * .9999f);
 
 			float desAngle = (float) (Math.asin(dy / tl) - Math.PI / 2);
 
@@ -183,8 +184,6 @@ public class SPController extends PoseController {
 
 		// }
 
-		super.applyTorques();
-
 		// now VF feedback stuff
 		for (supportLabel limb : supportLabel.values()) {
 			if (sp.getInfoNow(limb).ls == limbStatus.swing) {
@@ -234,8 +233,10 @@ public class SPController extends PoseController {
 		}
 
 		for (VirtualForce v : virtualForces) {
-			v.apply();
+			v.apply(character.getJointMap(), torques);
 		}
+
+		super.applyTorques();
 	}
 
 	/**
@@ -344,5 +345,10 @@ public class SPController extends PoseController {
 	@Override
 	public void reset() {
 		sp.reset();
+	}
+
+	@Override
+	public float getEndTime() {
+		return sp.getMaxFiniteTime() + 3.0f;
 	}
 }
