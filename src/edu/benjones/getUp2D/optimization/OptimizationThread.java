@@ -136,11 +136,15 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 				- character.getArms().get(0).getBase().getAnchor2().y)
 				* heightWeight;
 
-		cost = torqueCost + timeCost + heightCost;
+		if (character.getArms().get(0).getBase().getAnchor2().y < heightThreshold) {
+			System.out.println("Failure");
+			cost = Float.POSITIVE_INFINITY;
+		} else {
+			cost = torqueCost + timeCost + heightCost;
 
-		System.out.println("heightCost: " + heightCost + " torqueCost: "
-				+ torqueCost + " timeCost: " + timeCost);
-
+			System.out.println("heightCost: " + heightCost + " torqueCost: "
+					+ torqueCost + " timeCost: " + timeCost);
+		}
 	}
 
 	@Override

@@ -158,7 +158,7 @@ public class GetUpScenario {
 		// controller = new PoseController(character);
 		controller = new SPController(character,
 				new ParameterizedLyingGenerator(),
-				FileUtils.readParameters("../SPParameters/dart.par"));
+				FileUtils.readParameters("../SPParameters/bestSoFar"));
 
 	}
 

@@ -35,12 +35,13 @@ public class Optimize {
 		}
 
 		float[] initialParameters = FileUtils
-				.readParameters("./SPParameters/dart.par");
+				.readParameters("./SPParameters/bestSoFar");
 		for (int i = 0; i < numThreads; ++i)
 			threads[i].setParameterMaxDelta(FileUtils
 					.readParameters("./SPParameters/limits.par"));
 
 		int iteration = 0;
+		int improvements = 0;
 		float bestSoFar = Float.POSITIVE_INFINITY;
 		while (!stop) {
 			iteration++;
@@ -70,20 +71,24 @@ public class Optimize {
 				}
 			}
 			if (minCost < bestSoFar) {
+				improvements++;
 				initialParameters = threads[minIndex].getUpdatedParameters();
+				System.out.println("bestSoFar improved " + improvements
+						+ " times");
+				FileUtils.writeParameters("./SPParameters/bestSoFar",
+						initialParameters);
 			} else {
 				System.out.println("Nothing better than bestSoFar");
 			}
 
 			System.out.println("minCost is: " + minCost);
-			if (iteration % 1000 == 0) {
+			if (iteration % 100 == 0) {
 				FileUtils.writeParameters("./SPParameters/0428iteration"
 						+ iteration + ".par", initialParameters);
 			}
 		}
 
 		System.out.println("stopping after iteration: " + iteration);
-		FileUtils
-				.writeParameters("./SPParameters/bestSoFar", initialParameters);
+
 	}
 }
