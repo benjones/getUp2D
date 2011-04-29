@@ -68,8 +68,8 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 		Collections.shuffle(indeces);
 		// modify tweak number of parameters
 		for (int i = 0; i < tweaks; ++i) {
-			updatedParameters[i] += 2 * (rand.nextFloat() - .5f)
-					* parameterMaxDelta[i];
+			updatedParameters[indeces.get(i)] += 2 * (rand.nextFloat() - .5f)
+					* parameterMaxDelta[indeces.get(i)];
 		}
 
 	}
