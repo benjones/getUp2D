@@ -159,7 +159,7 @@ public class GetUpScenario {
 		System.out.println("loading controller");
 		controller = new SPController(character,
 				new ParameterizedLyingGenerator(),
-				FileUtils.readParameters("../SPParameters/SUPERFAIL"));// /dart.par"));
+				FileUtils.readParameters("../FAIL.Par"));// /dart.par"));
 
 	}
 

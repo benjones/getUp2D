@@ -589,4 +589,15 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		return jointMap;
 	}
 
+	@Override
+	public void destroy() {
+		for (RevoluteJoint j : joints) {
+			world.destroyJoint(j);
+		}
+		for (Body b : bodies) {
+			world.destroyBody(b);
+		}
+
+	}
+
 }

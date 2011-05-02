@@ -13,7 +13,6 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import org.jbox2d.common.Color3f;
-import org.jbox2d.common.IViewportTransform;
 import org.jbox2d.common.OBBViewportTransform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.common.XForm;
@@ -64,9 +63,11 @@ public class BufferedImageDebugDraw extends DebugDraw {
 	@Override
 	public void drawSolidPolygon(Vec2[] vertices, int vertexCount, Color3f color) {
 		Polygon p = setupPolygon(vertices, vertexCount);
-		g.setColor(convertColor(color));
+		Color c = convertColor(color);
+		g.setColor(c);
+		g.draw(p);
+		g.setColor(new Color(c.getRed() / 2, c.getGreen() / 2, c.getBlue() / 2));
 		g.fill(p);
-
 	}
 
 	private Ellipse2D.Float circle;
@@ -130,15 +131,15 @@ public class BufferedImageDebugDraw extends DebugDraw {
 	@Override
 	public void drawPoint(Vec2 position, float f, Color3f color3f) {
 		drawSolidCircle(position, 3, null, color3f);
-		
+
 	}
 
-	
 	private Vec2 segmentP1Global, segmentP2Global;
 	private Line2D.Float segmentLine;
+
 	@Override
 	public void drawSegment(Vec2 p1, Vec2 p2, Color3f color) {
-		if(segmentP1Global == null){
+		if (segmentP1Global == null) {
 			segmentP1Global = new Vec2();
 			segmentP2Global = new Vec2();
 			segmentLine = new Line2D.Float();
@@ -149,7 +150,7 @@ public class BufferedImageDebugDraw extends DebugDraw {
 		segmentLine.y1 = segmentP1Global.y;
 		segmentLine.x2 = segmentP2Global.x;
 		segmentLine.y2 = segmentP2Global.y;
-		
+
 		g.setColor(convertColor(color));
 		g.draw(segmentLine);
 

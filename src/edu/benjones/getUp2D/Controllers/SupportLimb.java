@@ -55,8 +55,8 @@ public class SupportLimb {
 	public void draw(DebugDraw g) {
 		if (ikTarg != null) {
 
-			g.drawCircle(ikTarg, .05f, Color3f.WHITE);
-			g.drawCircle(ikTarg.add(new Vec2(-1f, 1f)), .05f, Color3f.WHITE);
+			g.drawCircle(ikTarg, 5f, Color3f.WHITE);
+			g.drawCircle(ikTarg.add(new Vec2(-1f, 1f)), 5f, Color3f.WHITE);
 
 		}
 	}

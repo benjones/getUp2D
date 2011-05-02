@@ -82,4 +82,6 @@ public interface Character {
 	public float getTorsoLength();
 
 	public GetUpScenario getScenario();
+
+	public void destroy();
 }
