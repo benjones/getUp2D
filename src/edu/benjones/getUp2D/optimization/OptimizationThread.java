@@ -14,7 +14,6 @@ import edu.benjones.getUp2D.Utils.BufferedImageDebugDraw;
 
 import edu.benjones.getUp2D.Utils.FileUtils;
 
-
 public class OptimizationThread extends GetUpScenario implements Runnable {
 
 	protected float cost;
@@ -36,8 +35,14 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 	public OptimizationThread(DebugDraw g) {
 		super(g);
 		// TODO Auto-generated constructor stub
-		drawDesiredPose = false;
-		drawControllerExtras = false;
+		if (g == null) {
+			drawDesiredPose = false;
+			drawControllerExtras = false;
+		}
+		else{
+			drawDesiredPose = true;
+			drawControllerExtras = true;
+		}
 		rand = new Random();
 
 	}
@@ -111,7 +116,6 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 
 		// controller.reset();
 
-
 		float totalTorque;
 		float successTime = Float.POSITIVE_INFINITY;
 		int stepNumber = 0;
@@ -125,7 +129,6 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 					&& debugDraw instanceof BufferedImageDebugDraw) {
 				((BufferedImageDebugDraw) (debugDraw)).clear();
 			}
-
 
 			try {
 				physicsStep();
@@ -151,14 +154,17 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 			cost += totalTorque * torqueWeight;
 			time += timestep;
 
+			shoulderHeight = character.getArms().get(0).getBase().getAnchor2().y;
+
 			if (successTime == Float.POSITIVE_INFINITY
-					&& character.getArms().get(0).getBase().getAnchor2().y > heightThreshold) {
+					&& shoulderHeight > heightThreshold) {
 				successTime = time;
 				System.out.println("Time: " + time);
 			}
 			if ((stepNumber % 100 == 0)
 					&& debugDraw instanceof BufferedImageDebugDraw) {
-				((BufferedImageDebugDraw)debugDraw).saveImage("debugFrames/frame"+stepNumber+".png");
+				((BufferedImageDebugDraw) debugDraw)
+						.saveImage("debugFrames/frame" + stepNumber + ".png");
 			}
 
 		}
@@ -171,6 +177,10 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 					+ " at time: " + time);
 			cost = Float.POSITIVE_INFINITY;
 			FileUtils.writeParameters("FAIL.Par", updatedParameters);
+			if (debugDraw instanceof BufferedImageDebugDraw) {
+				((BufferedImageDebugDraw) debugDraw)
+						.saveImage("debugFrames/frameFINAL.png");
+			}
 			System.exit(1);
 		} else {
 			cost = torqueCost + timeCost + heightCost;
@@ -213,11 +223,6 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 		}
 
 		System.out.println("t: " + time + " Shoulder height " + shoulderHeight);
-	}
-
-	@Override
-	protected void setupCamera() {
-
 	}
 
 	public float getCost() {
