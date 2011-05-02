@@ -82,7 +82,7 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 		for (int i = 0; i < tweaks; ++i) {
 
 			updatedParameters[indeces.get(i)] += rand.nextGaussian()
-					* parameterMaxDelta[indeces.get(i)] * .5;
+					* parameterMaxDelta[indeces.get(i)];
 
 			// 2 * (rand.nextFloat() - .5f)
 			// * parameterMaxDelta[indeces.get(i)];
@@ -118,23 +118,52 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 		controller = new SPController(character,
 				new ParameterizedLyingGenerator(), updatedParameters);
 
-		// controller.reset();
+		float successTime = evaluate(timestep, false);
+		torqueCost = cost;
+		timeCost = timeWeight * successTime;
+		heightCost = Math.abs(maxHeight - shoulderHeight) * heightWeight;
 
+		if (shoulderHeight < heightThreshold) {
+			System.out.println("Failure, height: " + shoulderHeight
+					+ " at time: " + time);
+			cost = Float.POSITIVE_INFINITY;
+			FileUtils.writeParameters("FAIL.Par", updatedParameters);
+
+			// record the error:
+
+			time = 0;
+			character.destroy();
+			setupCharacter();
+			controller = new SPController(character,
+					new ParameterizedLyingGenerator(), updatedParameters);
+			evaluate(timestep, true);
+
+			if (debugDraw instanceof BufferedImageDebugDraw) {
+				((BufferedImageDebugDraw) debugDraw)
+						.saveImage("debugFrames/frameFINAL.png");
+			}
+			// System.exit(1);
+		} else {
+			cost = torqueCost + timeCost + heightCost;
+
+			System.out.println("heightCost: " + heightCost + " torqueCost: "
+					+ torqueCost + " timeCost: " + timeCost);
+		}
+	}
+
+	private float evaluate(float timestep, boolean record) {
 		float totalTorque;
 		float successTime = Float.POSITIVE_INFINITY;
-
-		successTime = Float.POSITIVE_INFINITY;
-		shoulderHeight = 0;
-
 		while (time < controller.getEndTime()) {
-			stepNumber++;
-			if ((stepNumber % 5 == 0)
+			if (record)
+				stepNumber++;
+			if (record && (stepNumber % 5 == 0)
 					&& debugDraw instanceof BufferedImageDebugDraw) {
 				((BufferedImageDebugDraw) (debugDraw)).clear();
 			}
 
 			try {
-				physicsStep();
+				evaluationStep(timestep);
 			} catch (Exception e) {
 				System.out.println("step failed: " + e.getMessage());
 
@@ -152,10 +181,9 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 			// compute cost
 			totalTorque = 0;
 			for (float f : controller.getTorques()) {
-				totalTorque += Math.abs(f);
+				totalTorque += Math.pow(f, 2);
 			}
 			cost += totalTorque * torqueWeight;
-			time += timestep;
 
 			shoulderHeight = character.getArms().get(0).getBase().getAnchor2().y;
 
@@ -164,7 +192,7 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 				successTime = time;
 				System.out.println("Time: " + time);
 			}
-			if ((stepNumber % 5 == 0)
+			if ((record && stepNumber % 5 == 0)
 					&& debugDraw instanceof BufferedImageDebugDraw) {
 				((BufferedImageDebugDraw) debugDraw)
 						.saveImage("debugFrames/frame"
@@ -173,29 +201,10 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 			}
 
 		}
-		torqueCost = cost;
-		timeCost = timeWeight * successTime;
-		heightCost = Math.abs(maxHeight - shoulderHeight) * heightWeight;
-
-		if (shoulderHeight < heightThreshold) {
-			System.out.println("Failure, height: " + shoulderHeight
-					+ " at time: " + time);
-			cost = Float.POSITIVE_INFINITY;
-			FileUtils.writeParameters("FAIL.Par", updatedParameters);
-			if (debugDraw instanceof BufferedImageDebugDraw) {
-				((BufferedImageDebugDraw) debugDraw)
-						.saveImage("debugFrames/frameFINAL.png");
-			}
-			System.exit(1);
-		} else {
-			cost = torqueCost + timeCost + heightCost;
-
-			System.out.println("heightCost: " + heightCost + " torqueCost: "
-					+ torqueCost + " timeCost: " + timeCost);
-		}
+		return successTime;
 	}
 
-	private void physicsStep(float timestep) {
+	private void evaluationStep(float timestep) {
 		float totalTorque;
 		try {
 			physicsStep();
@@ -226,8 +235,6 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 			successTime = time;
 			System.out.println("Time: " + time);
 		}
-
-		System.out.println("t: " + time + " Shoulder height " + shoulderHeight);
 	}
 
 	public float getCost() {
