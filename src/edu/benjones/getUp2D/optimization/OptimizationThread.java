@@ -9,6 +9,7 @@ import org.jbox2d.dynamics.DebugDraw;
 import edu.benjones.getUp2D.GetUpScenario;
 import edu.benjones.getUp2D.Controllers.SPController;
 import edu.benjones.getUp2D.Controllers.SupportPatterns.ParameterizedLyingGenerator;
+import edu.benjones.getUp2D.Utils.BufferedImageDebugDraw;
 
 public class OptimizationThread extends GetUpScenario implements Runnable {
 
@@ -97,7 +98,13 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 
 		float totalTorque;
 		float successTime = Float.POSITIVE_INFINITY;
+		int stepNumber = 0;
 		while (time < controller.getEndTime()) {
+			stepNumber++;
+			if ((stepNumber % 100 == 0)
+					&& debugDraw instanceof BufferedImageDebugDraw) {
+				((BufferedImageDebugDraw) (debugDraw)).clear();
+			}
 
 			try {
 				physicsStep();
@@ -127,6 +134,10 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 					&& character.getArms().get(0).getBase().getAnchor2().y > heightThreshold) {
 				successTime = time;
 				System.out.println("Time: " + time);
+			}
+			if ((stepNumber % 100 == 0)
+					&& debugDraw instanceof BufferedImageDebugDraw) {
+				((BufferedImageDebugDraw)debugDraw).saveImage("debugFrames/frame"+stepNumber+".png");
 			}
 
 		}

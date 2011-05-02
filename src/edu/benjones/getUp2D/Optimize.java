@@ -2,12 +2,13 @@ package edu.benjones.getUp2D;
 
 import java.util.Scanner;
 
+import edu.benjones.getUp2D.Utils.BufferedImageDebugDraw;
 import edu.benjones.getUp2D.Utils.FileUtils;
 import edu.benjones.getUp2D.optimization.OptimizationThread;
 
 public class Optimize {
 
-	protected final static int numThreads = 16;
+	protected final static int numThreads = 1;
 
 	private static boolean stop;
 
@@ -31,11 +32,11 @@ public class Optimize {
 		OptimizationThread[] threads = new OptimizationThread[numThreads];
 		Thread[] threadContainers = new Thread[numThreads];
 		for (int i = 0; i < numThreads; ++i) {
-			threads[i] = new OptimizationThread(null);
+			threads[i] = new OptimizationThread(new BufferedImageDebugDraw());
 		}
 
 		float[] initialParameters = FileUtils
-				.readParameters("./SPParameters/bestSoFar");
+				.readParameters("./SPParameters/dart.par");
 		for (int i = 0; i < numThreads; ++i)
 			threads[i].setParameterMaxDelta(FileUtils
 					.readParameters("./SPParameters/limits.par"));
