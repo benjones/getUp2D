@@ -9,7 +9,11 @@ import org.jbox2d.dynamics.DebugDraw;
 import edu.benjones.getUp2D.GetUpScenario;
 import edu.benjones.getUp2D.Controllers.SPController;
 import edu.benjones.getUp2D.Controllers.SupportPatterns.ParameterizedLyingGenerator;
+
 import edu.benjones.getUp2D.Utils.BufferedImageDebugDraw;
+
+import edu.benjones.getUp2D.Utils.FileUtils;
+
 
 public class OptimizationThread extends GetUpScenario implements Runnable {
 
@@ -17,12 +21,12 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 
 	protected Random rand;
 
-	protected final float torqueWeight = .05f;
+	protected final float torqueWeight = .001f;
 	protected final float timeWeight = 40f;
 	protected final float heightWeight = 1300f;
 
 	// these seem low
-	protected final float heightThreshold = .9f;
+	protected final float heightThreshold = .83f;
 	protected final float maxHeight = 1.1f;
 
 	protected float[] initialParameters;
@@ -35,6 +39,7 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 		drawDesiredPose = false;
 		drawControllerExtras = false;
 		rand = new Random();
+
 	}
 
 	public void setInitialParameters(float[] params) {
@@ -59,7 +64,8 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 	protected void updateParameters() {
 		assert (initialParameters.length == parameterMaxDelta.length);
 		updatedParameters = new float[initialParameters.length];
-		int tweaks = (int) (initialParameters.length * .2);
+		int tweaks = (int) (initialParameters.length * .1);
+
 		ArrayList<Integer> indeces = new ArrayList<Integer>(
 				initialParameters.length);
 		for (int i = 0; i < initialParameters.length; ++i) {
@@ -69,8 +75,13 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 		Collections.shuffle(indeces);
 		// modify tweak number of parameters
 		for (int i = 0; i < tweaks; ++i) {
-			updatedParameters[indeces.get(i)] += 2 * (rand.nextFloat() - .5f)
-					* parameterMaxDelta[indeces.get(i)];
+
+			updatedParameters[indeces.get(i)] += rand.nextGaussian()
+					* parameterMaxDelta[indeces.get(i)] * .5;
+
+			// 2 * (rand.nextFloat() - .5f)
+			// * parameterMaxDelta[indeces.get(i)];
+
 		}
 
 	}
@@ -79,11 +90,15 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 	public void setupController() {
 	}
 
+	private float time;
+	private float shoulderHeight;
+	private float successTime;
+
 	@Override
 	public void run() {
 
 		// perform an evaluation
-		float time = 0;
+		time = 0;
 		float timestep = (float) (1.0 / physicsFramerate);
 		cost = 0;
 
@@ -96,15 +111,21 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 
 		// controller.reset();
 
+
 		float totalTorque;
 		float successTime = Float.POSITIVE_INFINITY;
 		int stepNumber = 0;
+
+		successTime = Float.POSITIVE_INFINITY;
+		shoulderHeight = 0;
+
 		while (time < controller.getEndTime()) {
 			stepNumber++;
 			if ((stepNumber % 100 == 0)
 					&& debugDraw instanceof BufferedImageDebugDraw) {
 				((BufferedImageDebugDraw) (debugDraw)).clear();
 			}
+
 
 			try {
 				physicsStep();
@@ -143,19 +164,55 @@ public class OptimizationThread extends GetUpScenario implements Runnable {
 		}
 		torqueCost = cost;
 		timeCost = timeWeight * successTime;
-		heightCost = Math.abs(maxHeight
-				- character.getArms().get(0).getBase().getAnchor2().y)
-				* heightWeight;
+		heightCost = Math.abs(maxHeight - shoulderHeight) * heightWeight;
 
-		if (character.getArms().get(0).getBase().getAnchor2().y < heightThreshold) {
-			System.out.println("Failure");
+		if (shoulderHeight < heightThreshold) {
+			System.out.println("Failure, height: " + shoulderHeight
+					+ " at time: " + time);
 			cost = Float.POSITIVE_INFINITY;
+			FileUtils.writeParameters("FAIL.Par", updatedParameters);
+			System.exit(1);
 		} else {
 			cost = torqueCost + timeCost + heightCost;
 
 			System.out.println("heightCost: " + heightCost + " torqueCost: "
 					+ torqueCost + " timeCost: " + timeCost);
 		}
+	}
+
+	private void physicsStep(float timestep) {
+		float totalTorque;
+		try {
+			physicsStep();
+		} catch (Exception e) {
+			System.out.println("step failed: " + e.getMessage());
+
+			System.out.println("controlParams: ");
+			for (float p : updatedParameters)
+				System.out.println(p);
+
+			System.out.println("Torques: ");
+			for (float t : controller.getTorques()) {
+				System.out.println(t);
+			}
+
+			System.exit(1);
+		}
+		// compute cost
+		totalTorque = 0;
+		for (float f : controller.getTorques()) {
+			totalTorque += Math.pow(f, 2);
+		}
+		cost += totalTorque * torqueWeight;
+		time += timestep;
+		shoulderHeight = character.getArms().get(0).getBase().getAnchor2().y;
+		if (successTime == Float.POSITIVE_INFINITY
+				&& shoulderHeight > heightThreshold) {
+			successTime = time;
+			System.out.println("Time: " + time);
+		}
+
+		System.out.println("t: " + time + " Shoulder height " + shoulderHeight);
 	}
 
 	@Override

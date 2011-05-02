@@ -156,9 +156,10 @@ public class GetUpScenario {
 		// controller = new SPController(character, new
 		// LyingPatternGenerator());
 		// controller = new PoseController(character);
+		System.out.println("loading controller");
 		controller = new SPController(character,
 				new ParameterizedLyingGenerator(),
-				FileUtils.readParameters("../SPParameters/bestSoFar"));
+				FileUtils.readParameters("../SPParameters/SUPERFAIL"));// /dart.par"));
 
 	}
 
@@ -227,6 +228,9 @@ public class GetUpScenario {
 		contactMap.clear();
 
 		world.step(timestep, iterationCount);
+
+		// System.out.println("Shoulder height: "
+		// + character.getArms().get(0).getBase().getAnchor2().y);
 	}
 
 	public void setDrawContactPoints(boolean drawContactPoints) {

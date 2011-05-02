@@ -1,8 +1,11 @@
 package edu.benjones.getUp2D;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
+
 import edu.benjones.getUp2D.Utils.BufferedImageDebugDraw;
+
 import edu.benjones.getUp2D.Utils.FileUtils;
 import edu.benjones.getUp2D.optimization.OptimizationThread;
 
@@ -32,18 +35,21 @@ public class Optimize {
 		OptimizationThread[] threads = new OptimizationThread[numThreads];
 		Thread[] threadContainers = new Thread[numThreads];
 		for (int i = 0; i < numThreads; ++i) {
+
 			threads[i] = new OptimizationThread(new BufferedImageDebugDraw());
+
 		}
 
 		float[] initialParameters = FileUtils
 				.readParameters("./SPParameters/dart.par");
+		float[] limits = FileUtils.readParameters("./SPParameters/limits.par");
 		for (int i = 0; i < numThreads; ++i)
-			threads[i].setParameterMaxDelta(FileUtils
-					.readParameters("./SPParameters/limits.par"));
+			threads[i].setParameterMaxDelta(limits);
 
 		int iteration = 0;
 		int improvements = 0;
 		float bestSoFar = Float.POSITIVE_INFINITY;
+		ArrayList<Float> costOverTime = new ArrayList<Float>();
 		while (!stop) {
 			iteration++;
 			for (int i = 0; i < numThreads; ++i) {
@@ -74,22 +80,34 @@ public class Optimize {
 			if (minCost < bestSoFar) {
 				improvements++;
 				initialParameters = threads[minIndex].getUpdatedParameters();
+				bestSoFar = minCost;
 				System.out.println("bestSoFar improved " + improvements
 						+ " times");
+				costOverTime.add(minCost);
 				FileUtils.writeParameters("./SPParameters/bestSoFar",
 						initialParameters);
 			} else {
 				System.out.println("Nothing better than bestSoFar");
+				if (minCost == Float.POSITIVE_INFINITY) {
+					System.out.println("all failures: " + iteration);
+					FileUtils.writeParameters(
+							"./SPParameters/FAIL" + iteration,
+							threads[0].getUpdatedParameters());
+				}
 			}
 
 			System.out.println("minCost is: " + minCost);
 			if (iteration % 100 == 0) {
-				FileUtils.writeParameters("./SPParameters/0428iteration"
+				FileUtils.writeParameters("./SPParameters/0429iteration"
 						+ iteration + ".par", initialParameters);
 			}
+
 		}
 
 		System.out.println("stopping after iteration: " + iteration);
+		System.out.println("Costs: ");
+		for (float c : costOverTime)
+			System.out.println(c);
 
 	}
 }
