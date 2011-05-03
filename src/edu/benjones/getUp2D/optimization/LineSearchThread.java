@@ -11,6 +11,8 @@ public class LineSearchThread extends AbstractOptimizationThread {
 	protected final int maxDoublingIterations = 10;
 	protected int index;
 
+	protected boolean max;// true if we want max, false if we want min
+
 	protected float minValue, maxValue;// parameters to return
 
 	public LineSearchThread(DebugDraw g) {
@@ -27,23 +29,13 @@ public class LineSearchThread extends AbstractOptimizationThread {
 		for (int i = 0; i < initialParameters.length; ++i)
 			updatedParameters[i] = initialParameters[i];
 		// do min first, since we know where it starts
-		float minLow = 0f;// NOT NECESSARILY (x offsets can be negative)
-		float minHigh = initialParameters[index];
-		float minGuess = 0;
-		for (int iter = 0; iter < maxIterations; ++iter) {
-			minGuess = (minLow + minHigh) / 2.0f;
+		if (max)
+			computeMax();
+		else
+			computeMin();
+	}
 
-			updatedParameters[index] = minGuess;
-
-			if (evaluate(false)) {
-				minHigh = minGuess;
-			} else {
-				minLow = minGuess;
-			}
-
-		}
-		minValue = minGuess;
-
+	private void computeMax() {
 		// now do the max. Keep doubling the maxParameterDelta until it breaks
 		// or we hit a limit
 		float maxLow = initialParameters[index];
@@ -62,26 +54,71 @@ public class LineSearchThread extends AbstractOptimizationThread {
 		System.out.println("stepLength: " + stepLength + " after "
 				+ doublingIteration + " iterations");
 
-		maxLow = initialParameters[index];
-		maxHigh = updatedParameters[index];
+		if (success) {
+			maxValue = updatedParameters[index];
+			System.out.println("MAXED OUT!!");
+		} else {
+			maxLow = updatedParameters[index] - stepLength / 2;
+			maxHigh = updatedParameters[index];
 
-		updatedParameters[index] = maxLow;
-		if (!evaluate(false)) {
-			System.out.println("maxLow failed");
-		}
-
-		for (int iter = 0; iter < maxIterations; ++iter) {
-			maxGuess = (maxLow + maxHigh) / 2.0f;
-			updatedParameters[index] = maxGuess;
-
-			if (evaluate(false)) {
-				maxLow = maxGuess;
-			} else {
-				maxHigh = maxGuess;
+			updatedParameters[index] = maxLow;
+			if (!evaluate(false)) {
+				System.out.println("maxLow failed");
+				System.exit(1);
 			}
-		}
-		maxValue = maxGuess;
 
+			for (int iter = 0; iter < maxIterations; ++iter) {
+				maxGuess = (maxLow + maxHigh) / 2.0f;
+				updatedParameters[index] = maxGuess;
+
+				if (evaluate(false)) {
+					maxLow = maxGuess;
+				} else {
+					maxHigh = maxGuess;
+				}
+			}
+			maxValue = maxGuess;
+		}
+	}
+
+	private void computeMin() {
+		float minLow = 0f;// NOT NECESSARILY (x offsets can be negative)
+		float stepLength = parameterMaxDelta[index];
+		int doublingIteration = 0;
+		boolean success = true;
+		while (doublingIteration < maxDoublingIterations && success) {
+			doublingIteration++;
+			updatedParameters[index] -= stepLength;
+			success = evaluate(false);
+			stepLength *= 2;
+		}
+		if (success) {
+			minValue = updatedParameters[index];
+			System.out.println("MIN'd OUT!!!");
+		} else {
+			minLow = updatedParameters[index];
+			float minHigh = updatedParameters[index] + stepLength / 2;
+			updatedParameters[index] = minHigh;
+			if (!evaluate(false)) {
+				System.out.println("minHigh failed");
+				System.exit(1);
+			}
+
+			float minGuess = 0;
+			for (int iter = 0; iter < maxIterations; ++iter) {
+				minGuess = (minLow + minHigh) / 2.0f;
+
+				updatedParameters[index] = minGuess;
+
+				if (evaluate(false)) {
+					minHigh = minGuess;
+				} else {
+					minLow = minGuess;
+				}
+
+			}
+			minValue = minGuess;
+		}
 	}
 
 	@Override
@@ -144,6 +181,10 @@ public class LineSearchThread extends AbstractOptimizationThread {
 
 	public float getMaxValue() {
 		return maxValue;
+	}
+
+	public void setMax(boolean max) {
+		this.max = max;
 	}
 
 }
