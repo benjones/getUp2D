@@ -128,9 +128,9 @@ public class SPController extends PoseController {
 		}
 		if (simbiconLimbs.size() > 0) {
 			float tl = character.getTorsoLength();
-			float dy = Math.min(
+			float dy = Math.max(Math.min(
 					sp.getShoulderHeightNow() - sp.getHipHeightNow(),
-					tl * .9999f);
+					tl * .9999f), -tl * .9999f);
 
 			float desAngle = (float) (Math.asin(dy / tl) - Math.PI / 2);
 
@@ -219,7 +219,9 @@ public class SPController extends PoseController {
 		}
 
 		for (int i = 0; i < torques.length; ++i) {
+
 			torques[i] = MathUtils.clamp(torques[i], maxTorque);
+
 		}
 		super.applyTorques();
 	}
@@ -316,8 +318,10 @@ public class SPController extends PoseController {
 			v.draw(g);
 		}
 
-		float dx = character.getTorsoLength();
+		float tl = character.getTorsoLength();
 		float dy = sp.getShoulderHeightNow() - sp.getHipHeightNow();
+		float dx = (float) Math.sqrt(tl * tl
+				- Math.pow(MathUtils.clamp(dy, tl * .9999f), 2));
 		Vec2 desAngleStart = character.getRoot().getPosition()
 				.add(new Vec2(0f, 1f));
 		Vec2 desAngle = new Vec2(dx, dy);

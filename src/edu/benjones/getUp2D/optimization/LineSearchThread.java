@@ -22,11 +22,12 @@ public class LineSearchThread extends AbstractOptimizationThread {
 	public void run() {
 		if (updatedParameters == null) {
 			updatedParameters = new float[initialParameters.length];
-			for (int i = 0; i < initialParameters.length; ++i)
-				updatedParameters[i] = initialParameters[i];
 		}
+		// reset all parameters
+		for (int i = 0; i < initialParameters.length; ++i)
+			updatedParameters[i] = initialParameters[i];
 		// do min first, since we know where it starts
-		float minLow = 0f;
+		float minLow = 0f;// NOT NECESSARILY (x offsets can be negative)
 		float minHigh = initialParameters[index];
 		float minGuess = 0;
 		for (int iter = 0; iter < maxIterations; ++iter) {
@@ -61,8 +62,14 @@ public class LineSearchThread extends AbstractOptimizationThread {
 		System.out.println("stepLength: " + stepLength + " after "
 				+ doublingIteration + " iterations");
 
-		maxLow = updatedParameters[index] - stepLength / 2;
+		maxLow = initialParameters[index];
 		maxHigh = updatedParameters[index];
+
+		updatedParameters[index] = maxLow;
+		if (!evaluate(false)) {
+			System.out.println("maxLow failed");
+		}
+
 		for (int iter = 0; iter < maxIterations; ++iter) {
 			maxGuess = (maxLow + maxHigh) / 2.0f;
 			updatedParameters[index] = maxGuess;
@@ -95,13 +102,25 @@ public class LineSearchThread extends AbstractOptimizationThread {
 		successTime = Float.POSITIVE_INFINITY;
 		while (time < controller.getEndTime()) {
 
-			physicsStep();
+			try {
+				physicsStep();
+			} catch (Exception e) {
+				System.out.println("step failed: " + e.getMessage());
+				System.out.println("controlParams: ");
+				for (float p : updatedParameters)
+					System.out.println(p);
+				System.out.println("Torques: ");
+				for (float t : controller.getTorques()) {
+					System.out.println(t);
+				}
+				System.exit(1);
+			}
 
 			shoulderHeight = character.getArms().get(0).getBase().getAnchor2().y;
 			if (successTime == Float.POSITIVE_INFINITY
 					&& shoulderHeight > heightThreshold) {
 				successTime = time;
-				System.out.println("Time: " + time);
+				System.out.print("Time: " + time + " ");
 			}
 
 			time += timestep;
