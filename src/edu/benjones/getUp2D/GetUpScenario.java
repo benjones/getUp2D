@@ -163,7 +163,7 @@ public class GetUpScenario {
 		System.out.println("loading controller");
 		controller = new SPController(character,
 				new ParameterizedLyingGenerator(),
-				FileUtils.readParameters("../SPParameters/idleMinTest.par"));// /dart.par"));
+				FileUtils.readParameters("../SPParameters/idleMaxTest.par"));// /dart.par"));
 
 	}
 

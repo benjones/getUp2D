@@ -16,6 +16,6 @@ public class CCDOptimize {
 		lineThread.run();
 
 		System.out.println("Min value: " + lineThread.getMinValue());
-
+		System.out.println("Max value: " + lineThread.getMaxValue());
 	}
 }

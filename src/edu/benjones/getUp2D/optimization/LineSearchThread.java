@@ -47,6 +47,7 @@ public class LineSearchThread extends AbstractOptimizationThread {
 		// or we hit a limit
 		float maxLow = initialParameters[index];
 		float maxHigh;
+		float maxGuess = 0;
 		int doublingIteration = 0;
 		boolean success = true;
 		updatedParameters[index] = initialParameters[index];// reset this
@@ -59,6 +60,20 @@ public class LineSearchThread extends AbstractOptimizationThread {
 		}
 		System.out.println("stepLength: " + stepLength + " after "
 				+ doublingIteration + " iterations");
+
+		maxLow = updatedParameters[index] - stepLength / 2;
+		maxHigh = updatedParameters[index];
+		for (int iter = 0; iter < maxIterations; ++iter) {
+			maxGuess = (maxLow + maxHigh) / 2.0f;
+			updatedParameters[index] = maxGuess;
+
+			if (evaluate(false)) {
+				maxLow = maxGuess;
+			} else {
+				maxHigh = maxGuess;
+			}
+		}
+		maxValue = maxGuess;
 
 	}
 
