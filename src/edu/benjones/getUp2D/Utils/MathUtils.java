@@ -26,4 +26,8 @@ public class MathUtils {
 		return new Vec2(a.x + alpha * (b.x - a.x), a.y + alpha * (b.y - a.y));
 	}
 
+	public static float clamp(float v, float range) {
+		return Math.max(-range, Math.min(v, range));
+	}
+
 }

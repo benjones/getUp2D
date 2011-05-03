@@ -3,15 +3,13 @@ package edu.benjones.getUp2D;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-
 import edu.benjones.getUp2D.Utils.BufferedImageDebugDraw;
-
 import edu.benjones.getUp2D.Utils.FileUtils;
 import edu.benjones.getUp2D.optimization.OptimizationThread;
 
 public class Optimize {
 
-	protected final static int numThreads = 1;
+	protected final static int numThreads = 8;
 
 	private static boolean stop;
 

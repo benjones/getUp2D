@@ -15,6 +15,7 @@ import edu.benjones.getUp2D.Controllers.SupportPattern.supportInfo;
 import edu.benjones.getUp2D.Controllers.SupportPattern.supportLabel;
 import edu.benjones.getUp2D.Controllers.SupportPatterns.ParameterizedSupportPatternGenerator;
 import edu.benjones.getUp2D.Controllers.SupportPatterns.SupportPatternGenerator;
+import edu.benjones.getUp2D.Utils.MathUtils;
 import edu.benjones.getUp2D.Utils.PhysicsUtils;
 
 public class SPController extends PoseController {
@@ -29,6 +30,8 @@ public class SPController extends PoseController {
 	private ArrayList<SupportLimb> supportArms, supportLegs;
 
 	private float desiredXPosition;
+
+	private final float maxTorque = 80f;
 
 	public SPController(Character ch, SupportPatternGenerator g) {
 		super(ch);
@@ -162,27 +165,6 @@ public class SPController extends PoseController {
 						/ simbiconLimbs.size();
 			}
 		}
-		/*
-		 * if (supportLegs.get(0).canAndShouldSupport()) { if
-		 * (supportLegs.get(1).canAndShouldSupport()) { int index0 =
-		 * legs.get(0).getJointMap() .get(legs.get(0).getBase()); int index1 =
-		 * legs.get(1).getJointMap() .get(legs.get(1).getBase()); // clamp
-		 * rootTorqueError rootTorqueError = Math.max( -2 *
-		 * sp.getMaxRootCorrectionTorque(), Math.min( 2 *
-		 * sp.getMaxRootCorrectionTorque(), rootTorqueError)); torques[index0]
-		 * -= rootTorqueError * .5f; torques[index1] -= rootTorqueError * .5f; }
-		 * else { int index0 = legs.get(0).getJointMap()
-		 * .get(legs.get(0).getBase()); rootTorqueError = Math.max(
-		 * -sp.getMaxRootCorrectionTorque(), Math.min(
-		 * sp.getMaxRootCorrectionTorque(), rootTorqueError)); torques[index0]
-		 * -= rootTorqueError; } } else { int index1 = legs.get(1).getJointMap()
-		 * .get(legs.get(1).getBase()); rootTorqueError =
-		 * Math.max(-sp.getMaxRootCorrectionTorque(),
-		 * Math.min(sp.getMaxRootCorrectionTorque(), rootTorqueError));
-		 * torques[index1] -= rootTorqueError; }
-		 */
-
-		// }
 
 		// now VF feedback stuff
 		for (supportLabel limb : supportLabel.values()) {
@@ -236,6 +218,9 @@ public class SPController extends PoseController {
 			v.apply(character.getJointMap(), torques);
 		}
 
+		for (int i = 0; i < torques.length; ++i) {
+			torques[i] = MathUtils.clamp(torques[i], maxTorque);
+		}
 		super.applyTorques();
 	}
 

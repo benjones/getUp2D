@@ -1,6 +1,6 @@
 package edu.benjones.getUp2D.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
@@ -27,9 +27,17 @@ public class MathUtilsTests {
 				MathUtils.fixAngle((float) (2 * Math.PI)), 0f), true);
 		assertEquals(MathUtils.floatEquals(
 				MathUtils.fixAngle((float) (2.5 * Math.PI)),
-				(float) (Math.PI * .5 )), true);
+				(float) (Math.PI * .5)), true);
 		assertEquals(MathUtils.floatEquals(
 				MathUtils.fixAngle((float) (-2.5 * Math.PI)),
-				(float) (-Math.PI * .5 )), true);	
+				(float) (-Math.PI * .5)), true);
+	}
+
+	@Test
+	public void testClamp() {
+		assertEquals(MathUtils.floatEquals(MathUtils.clamp(-20, 10), -10), true);
+		assertEquals(MathUtils.floatEquals(MathUtils.clamp(20, 10), 10), true);
+		assertEquals(MathUtils.floatEquals(MathUtils.clamp(-20, 30), -20), true);
+		assertEquals(MathUtils.floatEquals(MathUtils.clamp(20, 30), 20), true);
 	}
 }

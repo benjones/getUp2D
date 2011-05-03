@@ -70,6 +70,7 @@ public class GetUpScenario {
 	private Body ground;
 
 	protected float simSpeed;
+	protected final float timestep;
 
 	public GetUpScenario(DebugDraw g) {
 		setupInitialPosition();
@@ -83,6 +84,7 @@ public class GetUpScenario {
 		drawDesiredPose = true;// false;
 		desiredPoseSetup = false;
 		drawControllerExtras = true;
+		timestep = (float) (1.0 / physicsFramerate);
 		simSpeed = 1.0f;
 		debugDraw = g;
 		createWorld();
@@ -138,10 +140,12 @@ public class GetUpScenario {
 	}
 
 	protected void setupCamera() {
-		world.setDebugDraw(debugDraw);
-		setDrawContactPoints(false);
-		debugDraw.setCamera(defaultCameraParams.x, defaultCameraParams.y,
-				defaultCameraParams.scale);
+		if (debugDraw != null) {
+			world.setDebugDraw(debugDraw);
+			setDrawContactPoints(false);
+			debugDraw.setCamera(defaultCameraParams.x, defaultCameraParams.y,
+					defaultCameraParams.scale);
+		}
 	}
 
 	public void setupCharacter() {
@@ -159,7 +163,7 @@ public class GetUpScenario {
 		System.out.println("loading controller");
 		controller = new SPController(character,
 				new ParameterizedLyingGenerator(),
-				FileUtils.readParameters("../SPParameters/bestSoFar"));// /dart.par"));
+				FileUtils.readParameters("../SPParameters/idleMinTest.par"));// /dart.par"));
 
 	}
 
@@ -197,7 +201,7 @@ public class GetUpScenario {
 			b.m_torque = 0f;
 		}
 		// playback speed
-		float timestep = (float) (1.0 / physicsFramerate);
+
 		// drawing gets done here I guess?
 		controller.computeTorques(world, timestep);
 
