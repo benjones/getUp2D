@@ -14,6 +14,7 @@ public class LineSearchThread extends AbstractOptimizationThread {
 	protected boolean max;// true if we want max, false if we want min
 
 	protected float minValue, maxValue;// parameters to return
+	protected boolean minBounded, maxBounded;
 
 	public LineSearchThread(DebugDraw g) {
 		super(g);
@@ -29,10 +30,21 @@ public class LineSearchThread extends AbstractOptimizationThread {
 		for (int i = 0; i < initialParameters.length; ++i)
 			updatedParameters[i] = initialParameters[i];
 		// do min first, since we know where it starts
-		if (max)
+		if (max) {
 			computeMax();
-		else
+			updatedParameters[index] = maxValue;
+			if (!evaluate(false)) {
+				System.out.println("max value for index: " + index
+						+ " is no good");
+			}
+		} else {
 			computeMin();
+			updatedParameters[index] = minValue;
+			if (!evaluate(false)) {
+				System.out.println("min value for index: " + index
+						+ " is no good");
+			}
+		}
 	}
 
 	private void computeMax() {
@@ -56,6 +68,7 @@ public class LineSearchThread extends AbstractOptimizationThread {
 
 		if (success) {
 			maxValue = updatedParameters[index];
+			maxBounded = false;
 			System.out.println("MAXED OUT!!");
 		} else {
 			maxLow = updatedParameters[index] - stepLength / 2;
@@ -77,7 +90,8 @@ public class LineSearchThread extends AbstractOptimizationThread {
 					maxHigh = maxGuess;
 				}
 			}
-			maxValue = maxGuess;
+			maxValue = maxLow;// be conservative, use a guaranteed bound
+			maxBounded = true;
 		}
 	}
 
@@ -94,13 +108,21 @@ public class LineSearchThread extends AbstractOptimizationThread {
 		}
 		if (success) {
 			minValue = updatedParameters[index];
+			minBounded = false;
 			System.out.println("MIN'd OUT!!!");
 		} else {
 			minLow = updatedParameters[index];
 			float minHigh = updatedParameters[index] + stepLength / 2;
 			updatedParameters[index] = minHigh;
 			if (!evaluate(false)) {
-				System.out.println("minHigh failed");
+				System.out.println("minHigh failed for index: " + index
+						+ " value is: " + updatedParameters[index]
+						+ " and was:" + initialParameters[index]);
+				updatedParameters[index] = initialParameters[index];
+				if (!evaluate(false)) {
+					System.out.println("failed initialParameters, value: "
+							+ initialParameters[index]);
+				}
 				System.exit(1);
 			}
 
@@ -117,7 +139,8 @@ public class LineSearchThread extends AbstractOptimizationThread {
 				}
 
 			}
-			minValue = minGuess;
+			minValue = minHigh;// this should definitely work
+			minBounded = true;
 		}
 	}
 
@@ -185,6 +208,14 @@ public class LineSearchThread extends AbstractOptimizationThread {
 
 	public void setMax(boolean max) {
 		this.max = max;
+	}
+
+	public boolean isMinBounded() {
+		return minBounded;
+	}
+
+	public boolean isMaxBounded() {
+		return maxBounded;
 	}
 
 }

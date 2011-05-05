@@ -6,10 +6,11 @@ import java.util.Scanner;
 import edu.benjones.getUp2D.Utils.BufferedImageDebugDraw;
 import edu.benjones.getUp2D.Utils.FileUtils;
 import edu.benjones.getUp2D.optimization.OptimizationThread;
+import edu.benjones.getUp2D.optimization.OptimizationThread.costType;
 
 public class Optimize {
 
-	protected final static int numThreads = 8;
+	protected final static int numThreads = 16;
 
 	private static boolean stop;
 
@@ -46,13 +47,18 @@ public class Optimize {
 
 		int iteration = 0;
 		int improvements = 0;
-		float bestSoFar = Float.POSITIVE_INFINITY;
+		int iterationsSinceImprovement = 0;
+		float gaussianScale = 1.0f;
+		float bestTimeSoFar = Float.POSITIVE_INFINITY;
+		float bestWidthSoFar = Float.POSITIVE_INFINITY;
+		costType optimizationType = costType.endTime;
 		ArrayList<Float> costOverTime = new ArrayList<Float>();
 		while (!stop) {
 			iteration++;
 			for (int i = 0; i < numThreads; ++i) {
 				threads[i].setInitialParameters(initialParameters);
-
+				threads[i].setGaussianScale(gaussianScale);
+				threads[i].setCostType(optimizationType);
 				threads[i].reset();
 				threadContainers[i] = new Thread(threads[i]);
 				threadContainers[i].start();
@@ -75,6 +81,13 @@ public class Optimize {
 					minIndex = i;
 				}
 			}
+			float bestSoFar = Float.POSITIVE_INFINITY;
+			if (optimizationType == costType.endTime) {
+				bestSoFar = bestTimeSoFar;
+			} else if (optimizationType == costType.footWidth) {
+				bestSoFar = bestWidthSoFar;
+			}
+
 			if (minCost < bestSoFar) {
 				improvements++;
 				initialParameters = threads[minIndex].getUpdatedParameters();
@@ -82,10 +95,30 @@ public class Optimize {
 				System.out.println("bestSoFar improved " + improvements
 						+ " times");
 				costOverTime.add(minCost);
-				FileUtils.writeParameters("./SPParameters/bestSoFar",
-						initialParameters);
+				FileUtils.writeParameters("./SPParameters/improvement"
+						+ improvements + ".par", initialParameters);
+				iterationsSinceImprovement = 0;
+				gaussianScale = 1.0f;
+
+				if (optimizationType == costType.endTime) {
+					bestTimeSoFar = bestSoFar;
+				} else if (optimizationType == costType.footWidth) {
+					bestWidthSoFar = bestSoFar;
+				}
+
 			} else {
 				System.out.println("Nothing better than bestSoFar");
+				iterationsSinceImprovement++;
+				if (iterationsSinceImprovement > 10) {
+					if (optimizationType == costType.endTime) {
+						optimizationType = costType.footWidth;
+						System.out.println("switching to foot optimization");
+					} else {
+						optimizationType = costType.endTime;
+						System.out.println("switching to time optimization");
+					}
+					iterationsSinceImprovement = 0;
+				}
 				if (minCost == Float.POSITIVE_INFINITY) {
 					System.out.println("all failures: " + iteration);
 					FileUtils.writeParameters(
@@ -96,11 +129,14 @@ public class Optimize {
 
 			System.out.println("minCost is: " + minCost);
 			if (iteration % 100 == 0) {
-				FileUtils.writeParameters("./SPParameters/0429iteration"
+				FileUtils.writeParameters("./SPParameters/0504iteration"
 						+ iteration + ".par", initialParameters);
 			}
 
 		}
+
+		FileUtils
+				.writeParameters("./SPParameters/bestSoFar", initialParameters);
 
 		System.out.println("stopping after iteration: " + iteration);
 		System.out.println("Costs: ");

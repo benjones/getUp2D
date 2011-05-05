@@ -15,9 +15,9 @@ public class CCDOptimize {
 				.readParameters("./SPParameters/dart.par");
 		float[] deltas = FileUtils
 				.readParameters("./SPParameters/lineSearchStep.par");
-		minThread.setInitialParameters(initialParameters);
+
 		minThread.setParameterMaxDelta(deltas);
-		maxThread.setInitialParameters(initialParameters);
+
 		maxThread.setParameterMaxDelta(deltas);
 
 		minThread.setMax(false);
@@ -33,6 +33,10 @@ public class CCDOptimize {
 		Thread thread1, thread2;
 
 		for (int i = 0; i < indeces.size(); ++i) {
+
+			minThread.setInitialParameters(initialParameters);
+			maxThread.setInitialParameters(initialParameters);
+
 			minThread.setIndex(indeces.get(i));
 			maxThread.setIndex(indeces.get(i));
 
@@ -55,6 +59,22 @@ public class CCDOptimize {
 					+ " original value: " + initialParameters[indeces.get(i)]);
 			System.out.println("Min value: " + minThread.getMinValue());
 			System.out.println("Max value: " + maxThread.getMaxValue());
+
+			if (minThread.isMinBounded() && maxThread.isMaxBounded()) {
+				initialParameters[indeces.get(i)] = (minThread.getMinValue() + maxThread
+						.getMaxValue()) / 2;
+				System.out.println("Updated parameter: " + indeces.get(i)
+						+ " to " + initialParameters[indeces.get(i)]);
+
+				FileUtils.writeParameters(
+						"./SPParameters/update" + indeces.get(i) + ".par",
+						initialParameters);
+
+			} else {
+				System.out.println("Unbounded, not updating parameter: "
+						+ indeces.get(i));
+			}
+
 		}
 	}
 }
