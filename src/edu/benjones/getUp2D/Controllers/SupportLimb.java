@@ -55,8 +55,8 @@ public class SupportLimb {
 	public void draw(DebugDraw g) {
 		if (ikTarg != null) {
 
-			g.drawCircle(ikTarg, 5f, Color3f.WHITE);
-			g.drawCircle(ikTarg.add(new Vec2(-1f, 1f)), 5f, Color3f.WHITE);
+			g.drawCircle(ikTarg, .05f, Color3f.WHITE);
+			g.drawCircle(ikTarg.add(new Vec2(-1f, 1f)), .05f, Color3f.WHITE);
 
 		}
 	}
@@ -105,11 +105,7 @@ public class SupportLimb {
 				}
 				swingEnd.y = limb.getCharacter().getScenario()
 						.getGroundHeightAt(swingEnd.x);
-				// if its lifting soon, shift weight to other limb
-				float ttl = parent.getTimeToLift(limbLabel);
-				if (ttl < .5) {
-					swingEnd.y += .04 * ttl;
-				}
+
 			}
 			lastInfo = info;
 		}
@@ -147,6 +143,13 @@ public class SupportLimb {
 				desHeight = parent.getShoulderHeightNow();
 			}
 			ikTarg.y = Math.min(limb.getBase().getAnchor2().y - desHeight, 0f);
+
+			// if its lifting soon, shift weight to other limb
+			float ttl = parent.getTimeToLift(limbLabel);
+			if (ttl < .5) {
+				swingEnd.y += .04 * (.5 - ttl);
+			}
+
 			// might do quadruped style hipHeight - hipHeightDes style thing
 			// here if VF's aren't good enough
 		}

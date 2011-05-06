@@ -161,9 +161,13 @@ public class GetUpScenario {
 		// LyingPatternGenerator());
 		// controller = new PoseController(character);
 		System.out.println("loading controller");
+
 		controller = new SPController(character,
 				new ParameterizedLyingGenerator(),
-				FileUtils.readParameters("../SPParameters/bestSoFar"));// /dart.par"));
+				FileUtils.readParameters("../SPParameters/improvement49.par"));
+
+		// controller = new SPController(character, new
+		// LyingPatternGenerator());
 
 	}
 

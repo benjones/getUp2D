@@ -600,4 +600,29 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 
 	}
 
+	@Override
+	public Vec2 getCOMPosition() {
+		Vec2 cm = new Vec2(0f, 0f);
+		float mass = 0f;
+		for (Body b : bodies) {
+			float bMass = b.getMass();
+			mass += bMass;
+			cm.addLocal(b.getWorldCenter().mul(bMass));
+		}
+		cm.mul(1.0f / mass);
+		return cm;
+	}
+
+	@Override
+	public Vec2 getCOMVelocity() {
+		Vec2 cmv = new Vec2(0f, 0f);
+		float mass = 0f;
+		for (Body b : bodies) {
+			float bMass = b.getMass();
+			mass += bMass;
+			cmv.addLocal(b.getLinearVelocity().mul(bMass));
+		}
+		cmv.mul(1.0f / mass);
+		return cmv;
+	}
 }

@@ -77,7 +77,12 @@ public interface Character {
 		public float getTangentialForceOnLeg(float dt);
 
 		public Character getCharacter();
+
 	}
+
+	public Vec2 getCOMPosition();
+
+	public Vec2 getCOMVelocity();
 
 	public float getTorsoLength();
 
