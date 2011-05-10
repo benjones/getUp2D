@@ -4,7 +4,7 @@ import edu.benjones.getUp2D.Controllers.SupportPattern;
 import edu.benjones.getUp2D.Controllers.SupportPattern.limbStatus;
 import edu.benjones.getUp2D.Controllers.SupportPattern.supportInfo;
 import edu.benjones.getUp2D.Controllers.SupportPattern.supportLabel;
-import edu.benjones.getUp2D.Controllers.SupportPatterns.ParameterizedLyingGenerator.lyingParamOffsets;
+import edu.benjones.getUp2D.Utils.TimeWarp;
 import edu.benjones.getUp2D.Utils.Trajectory1D.entry;
 
 public class WarpedLyingPatternGenerator implements
@@ -65,7 +65,18 @@ public class WarpedLyingPatternGenerator implements
 		hipV3,
 		hipV4,
 		hipV5,
-		hipV6;
+		hipV6,
+		warpVel0,
+		warpVel1,
+		warpVel2,
+		warpVel3,
+		warpVel4,
+		warpVel5,
+		warpVel6,
+		warpVel7,
+		warpVel8,
+		warpVel9,
+		warpVel10;
 	}
 
 	@Override
@@ -73,124 +84,151 @@ public class WarpedLyingPatternGenerator implements
 		SupportPattern sp = new SupportPattern();
 
 		// System.out.println(parameters.length);
-		assert (parameters.length == lyingParamOffsets.values().length);
+		assert (parameters.length == warpedLyingParamOffsets.values().length);
 
-		sp.setIdleModifier(parameters[lyingParamOffsets.idleModifier.ordinal()]);
-		sp.setHipsVerticalKP(parameters[lyingParamOffsets.hipsVerticalKP
+		sp.setIdleModifier(parameters[warpedLyingParamOffsets.idleModifier
 				.ordinal()]);
-		sp.setHipsVerticalKD(parameters[lyingParamOffsets.hipsVerticalKD
+		sp.setHipsVerticalKP(parameters[warpedLyingParamOffsets.hipsVerticalKP
 				.ordinal()]);
-
-		sp.setShouldersVerticalKP(parameters[lyingParamOffsets.shouldersVerticalKP
-				.ordinal()]);
-		sp.setShouldersVerticalKD(parameters[lyingParamOffsets.shouldersVerticalKD
+		sp.setHipsVerticalKD(parameters[warpedLyingParamOffsets.hipsVerticalKD
 				.ordinal()]);
 
-		sp.setSagittalKP(parameters[lyingParamOffsets.sagittalKP.ordinal()]);
-		sp.setSagittalKD(parameters[lyingParamOffsets.sagittalKD.ordinal()]);
-
-		sp.setRootKP(parameters[lyingParamOffsets.rootKP.ordinal()]);
-		sp.setRootKD(parameters[lyingParamOffsets.rootKD.ordinal()]);
-
-		sp.setMaxRootCorrectionTorque(parameters[lyingParamOffsets.maxRootCorrection
+		sp.setShouldersVerticalKP(parameters[warpedLyingParamOffsets.shouldersVerticalKP
+				.ordinal()]);
+		sp.setShouldersVerticalKD(parameters[warpedLyingParamOffsets.shouldersVerticalKD
 				.ordinal()]);
 
-		sp.addLimbStatus(supportLabel.leftArm,
-				parameters[lyingParamOffsets.laTime1.ordinal()],
+		sp.setSagittalKP(parameters[warpedLyingParamOffsets.sagittalKP
+				.ordinal()]);
+		sp.setSagittalKD(parameters[warpedLyingParamOffsets.sagittalKD
+				.ordinal()]);
+
+		sp.setRootKP(parameters[warpedLyingParamOffsets.rootKP.ordinal()]);
+		sp.setRootKD(parameters[warpedLyingParamOffsets.rootKD.ordinal()]);
+
+		sp.setMaxRootCorrectionTorque(parameters[warpedLyingParamOffsets.maxRootCorrection
+				.ordinal()]);
+
+		sp.addLimbStatus(
+				supportLabel.leftArm,
+				parameters[warpedLyingParamOffsets.laTime1.ordinal()],
 				new supportInfo(limbStatus.swing, false,
-						parameters[lyingParamOffsets.laOffset1.ordinal()]));
+						parameters[warpedLyingParamOffsets.laOffset1.ordinal()]));
 		sp.addLimbStatus(supportLabel.leftArm,
-				parameters[lyingParamOffsets.laTime2.ordinal()],
+				parameters[warpedLyingParamOffsets.laTime2.ordinal()],
 				new supportInfo(limbStatus.stance, false, 0f));
 
-		sp.addLimbStatus(supportLabel.rightArm,
-				parameters[lyingParamOffsets.raTime1.ordinal()],
+		sp.addLimbStatus(
+				supportLabel.rightArm,
+				parameters[warpedLyingParamOffsets.raTime1.ordinal()],
 				new supportInfo(limbStatus.swing, false,
-						parameters[lyingParamOffsets.raOffset1.ordinal()]));
+						parameters[warpedLyingParamOffsets.raOffset1.ordinal()]));
 		sp.addLimbStatus(supportLabel.rightArm,
-				parameters[lyingParamOffsets.raTime2.ordinal()],
+				parameters[warpedLyingParamOffsets.raTime2.ordinal()],
 				new supportInfo(limbStatus.stance, false, 0f));
 
 		sp.addLimbStatus(supportLabel.rightLeg,
-				parameters[lyingParamOffsets.rlTime1.ordinal()],
+				parameters[warpedLyingParamOffsets.rlTime1.ordinal()],
 				new supportInfo(limbStatus.stance, true, 0f));
 
 		sp.addLimbStatus(supportLabel.leftLeg,
-				parameters[lyingParamOffsets.llTime1.ordinal()],
+				parameters[warpedLyingParamOffsets.llTime1.ordinal()],
 				new supportInfo(limbStatus.stance, true, 0f));
 
-		sp.addLimbStatus(supportLabel.rightArm,
-				parameters[lyingParamOffsets.raTime3.ordinal()],
+		sp.addLimbStatus(
+				supportLabel.rightArm,
+				parameters[warpedLyingParamOffsets.raTime3.ordinal()],
 				new supportInfo(limbStatus.swing, false,
-						parameters[lyingParamOffsets.raOffset2.ordinal()]));
+						parameters[warpedLyingParamOffsets.raOffset2.ordinal()]));
 		sp.addLimbStatus(supportLabel.rightArm,
-				parameters[lyingParamOffsets.raTime4.ordinal()],
+				parameters[warpedLyingParamOffsets.raTime4.ordinal()],
 				new supportInfo(limbStatus.stance, false, 0f));
 
-		sp.addLimbStatus(supportLabel.leftArm,
-				parameters[lyingParamOffsets.laTime3.ordinal()],
+		sp.addLimbStatus(
+				supportLabel.leftArm,
+				parameters[warpedLyingParamOffsets.laTime3.ordinal()],
 				new supportInfo(limbStatus.swing, false,
-						parameters[lyingParamOffsets.laOffset2.ordinal()]));
+						parameters[warpedLyingParamOffsets.laOffset2.ordinal()]));
 		sp.addLimbStatus(supportLabel.leftArm,
-				parameters[lyingParamOffsets.laTime4.ordinal()],
+				parameters[warpedLyingParamOffsets.laTime4.ordinal()],
 				new supportInfo(limbStatus.stance, false, 0f));
 
-		sp.addLimbStatus(supportLabel.leftLeg,
-				parameters[lyingParamOffsets.llTime2.ordinal()],
+		sp.addLimbStatus(
+				supportLabel.leftLeg,
+				parameters[warpedLyingParamOffsets.llTime2.ordinal()],
 				new supportInfo(limbStatus.swing, false,
-						parameters[lyingParamOffsets.llOffset1.ordinal()]));
+						parameters[warpedLyingParamOffsets.llOffset1.ordinal()]));
 		sp.addLimbStatus(supportLabel.leftLeg,
-				parameters[lyingParamOffsets.llTime3.ordinal()],
+				parameters[warpedLyingParamOffsets.llTime3.ordinal()],
 				new supportInfo(limbStatus.stance, false, 0f));
 
 		sp.addLimbStatus(supportLabel.rightLeg,
-				parameters[lyingParamOffsets.rlTime2.ordinal()],
+				parameters[warpedLyingParamOffsets.rlTime2.ordinal()],
 				new supportInfo(limbStatus.stance, false, 0f));
 
 		sp.addLimbStatus(supportLabel.leftArm,
-				parameters[lyingParamOffsets.laTime5.ordinal()],
+				parameters[warpedLyingParamOffsets.laTime5.ordinal()],
 				new supportInfo(limbStatus.idle, false, 0f));
 
 		sp.addLimbStatus(supportLabel.rightArm,
-				parameters[lyingParamOffsets.raTime5.ordinal()],
+				parameters[warpedLyingParamOffsets.raTime5.ordinal()],
 				new supportInfo(limbStatus.idle, false, 0f));
 
 		sp.addShoulderHeightKnot(new entry(
-				parameters[lyingParamOffsets.shoulderT1.ordinal()],
-				parameters[lyingParamOffsets.shoulderV1.ordinal()]));
+				parameters[warpedLyingParamOffsets.shoulderT1.ordinal()],
+				parameters[warpedLyingParamOffsets.shoulderV1.ordinal()]));
 		sp.addShoulderHeightKnot(new entry(
-				parameters[lyingParamOffsets.shoulderT2.ordinal()],
-				parameters[lyingParamOffsets.shoulderV2.ordinal()]));
+				parameters[warpedLyingParamOffsets.shoulderT2.ordinal()],
+				parameters[warpedLyingParamOffsets.shoulderV2.ordinal()]));
 		sp.addShoulderHeightKnot(new entry(
-				parameters[lyingParamOffsets.shoulderT3.ordinal()],
-				parameters[lyingParamOffsets.shoulderV3.ordinal()]));
+				parameters[warpedLyingParamOffsets.shoulderT3.ordinal()],
+				parameters[warpedLyingParamOffsets.shoulderV3.ordinal()]));
 		sp.addShoulderHeightKnot(new entry(
-				parameters[lyingParamOffsets.shoulderT4.ordinal()],
-				parameters[lyingParamOffsets.shoulderV4.ordinal()]));
+				parameters[warpedLyingParamOffsets.shoulderT4.ordinal()],
+				parameters[warpedLyingParamOffsets.shoulderV4.ordinal()]));
 		sp.addShoulderHeightKnot(new entry(
-				parameters[lyingParamOffsets.shoulderT5.ordinal()],
-				parameters[lyingParamOffsets.shoulderV5.ordinal()]));
+				parameters[warpedLyingParamOffsets.shoulderT5.ordinal()],
+				parameters[warpedLyingParamOffsets.shoulderV5.ordinal()]));
 		sp.addShoulderHeightKnot(new entry(
-				parameters[lyingParamOffsets.shoulderT6.ordinal()],
-				parameters[lyingParamOffsets.shoulderV6.ordinal()]));
+				parameters[warpedLyingParamOffsets.shoulderT6.ordinal()],
+				parameters[warpedLyingParamOffsets.shoulderV6.ordinal()]));
 		sp.addShoulderHeightKnot(new entry(
-				parameters[lyingParamOffsets.shoulderT7.ordinal()],
-				parameters[lyingParamOffsets.shoulderV7.ordinal()]));
+				parameters[warpedLyingParamOffsets.shoulderT7.ordinal()],
+				parameters[warpedLyingParamOffsets.shoulderV7.ordinal()]));
 
-		sp.addHipHeightKnot(new entry(parameters[lyingParamOffsets.hipT1
-				.ordinal()], parameters[lyingParamOffsets.hipV1.ordinal()]));
-		sp.addHipHeightKnot(new entry(parameters[lyingParamOffsets.hipT2
-				.ordinal()], parameters[lyingParamOffsets.hipV2.ordinal()]));
-		sp.addHipHeightKnot(new entry(parameters[lyingParamOffsets.hipT3
-				.ordinal()], parameters[lyingParamOffsets.hipV3.ordinal()]));
-		sp.addHipHeightKnot(new entry(parameters[lyingParamOffsets.hipT4
-				.ordinal()], parameters[lyingParamOffsets.hipV4.ordinal()]));
-		sp.addHipHeightKnot(new entry(parameters[lyingParamOffsets.hipT5
-				.ordinal()], parameters[lyingParamOffsets.hipV5.ordinal()]));
-		sp.addHipHeightKnot(new entry(parameters[lyingParamOffsets.hipT6
-				.ordinal()], parameters[lyingParamOffsets.hipV6.ordinal()]));
+		sp.addHipHeightKnot(new entry(parameters[warpedLyingParamOffsets.hipT1
+				.ordinal()],
+				parameters[warpedLyingParamOffsets.hipV1.ordinal()]));
+		sp.addHipHeightKnot(new entry(parameters[warpedLyingParamOffsets.hipT2
+				.ordinal()],
+				parameters[warpedLyingParamOffsets.hipV2.ordinal()]));
+		sp.addHipHeightKnot(new entry(parameters[warpedLyingParamOffsets.hipT3
+				.ordinal()],
+				parameters[warpedLyingParamOffsets.hipV3.ordinal()]));
+		sp.addHipHeightKnot(new entry(parameters[warpedLyingParamOffsets.hipT4
+				.ordinal()],
+				parameters[warpedLyingParamOffsets.hipV4.ordinal()]));
+		sp.addHipHeightKnot(new entry(parameters[warpedLyingParamOffsets.hipT5
+				.ordinal()],
+				parameters[warpedLyingParamOffsets.hipV5.ordinal()]));
+		sp.addHipHeightKnot(new entry(parameters[warpedLyingParamOffsets.hipT6
+				.ordinal()],
+				parameters[warpedLyingParamOffsets.hipV6.ordinal()]));
 
+		TimeWarp tw = new TimeWarp(0, 15, 10);
+		tw.setWarp(0, parameters[warpedLyingParamOffsets.warpVel0.ordinal()]);
+		tw.setWarp(1, parameters[warpedLyingParamOffsets.warpVel1.ordinal()]);
+		tw.setWarp(2, parameters[warpedLyingParamOffsets.warpVel2.ordinal()]);
+		tw.setWarp(3, parameters[warpedLyingParamOffsets.warpVel3.ordinal()]);
+		tw.setWarp(4, parameters[warpedLyingParamOffsets.warpVel4.ordinal()]);
+		tw.setWarp(5, parameters[warpedLyingParamOffsets.warpVel5.ordinal()]);
+		tw.setWarp(6, parameters[warpedLyingParamOffsets.warpVel6.ordinal()]);
+		tw.setWarp(7, parameters[warpedLyingParamOffsets.warpVel7.ordinal()]);
+		tw.setWarp(8, parameters[warpedLyingParamOffsets.warpVel8.ordinal()]);
+		tw.setWarp(9, parameters[warpedLyingParamOffsets.warpVel9.ordinal()]);
+		tw.setWarp(10, parameters[warpedLyingParamOffsets.warpVel10.ordinal()]);
+
+		sp.setTimeWarp(tw);
 		return sp;
 	}
-
 }

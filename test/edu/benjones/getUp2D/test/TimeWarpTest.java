@@ -101,6 +101,16 @@ public class TimeWarpTest {
 		assertEquals(
 				MathUtils.floatEquals(tw.unWarp(tw.getPhaseAtTime(7.5f)), 7.5f),
 				true);
+		assertEquals(
+				MathUtils.floatEquals(tw.unWarp(tw.getPhaseAtTime(5f)), 5f),
+				true);
+		assertEquals(
+				MathUtils.floatEquals(tw.unWarp(tw.getPhaseAtTime(4f)), 4f),
+				true);
+		assertEquals(
+				MathUtils.floatEquals(tw.unWarp(tw.getPhaseAtTime(6f)), 6f),
+				true);
+
 	}
 
 }

@@ -337,6 +337,6 @@ public class SPController extends PoseController {
 
 	@Override
 	public float getEndTime() {
-		return sp.getMaxFiniteTime() + 3.0f;
+		return sp.getMaxFinitePhase() + 3.0f;
 	}
 }

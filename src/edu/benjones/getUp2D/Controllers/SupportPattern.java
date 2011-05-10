@@ -164,16 +164,24 @@ public class SupportPattern {
 		return hipHeight.evaluateLinear(timeWarp.getPhaseAtTime(t));
 	}
 
+	public float getHipHeightAtPhase(float t) {
+		return hipHeight.evaluateLinear(t);
+	}
+
 	public float getShoulderHeightAtTime(float t) {
 		return shoulderHeight.evaluateLinear(timeWarp.getPhaseAtTime(t));
 	}
 
+	public float getShoulderHeightAtPhase(float t) {
+		return shoulderHeight.evaluateLinear(t);
+	}
+
 	public float getHipHeightNow() {
-		return getHipHeightAtTime(timeWarp.getPhaseAtTime(phase));
+		return getHipHeightAtTime(phase);
 	}
 
 	public float getShoulderHeightNow() {
-		return getShoulderHeightAtTime(timeWarp.getPhaseAtTime(phase));
+		return getShoulderHeightAtTime(phase);
 	}
 
 	public supportInfo getInfoAtTime(supportLabel limb, float t) {
@@ -181,8 +189,13 @@ public class SupportPattern {
 				timeWarp.getPhaseAtTime(t));
 	}
 
+	public supportInfo getInfoAtPhase(supportLabel limb, float t) {
+		return limbPatterns.get(limb.ordinal()).getInfoAtTime(t);
+	}
+
 	public supportInfo getInfoNow(supportLabel limb) {
-		return getInfoAtTime(limb, timeWarp.getPhaseAtTime(phase));
+		// gets warped in the next call
+		return getInfoAtTime(limb, phase);
 	}
 
 	public float getSwingPhase(supportLabel limb) {
@@ -191,22 +204,23 @@ public class SupportPattern {
 				.getSwingPhaseInfoAtTime(timeWarp.getPhaseAtTime(phase));
 		if (info == null)
 			return 0f;
-		return (info.now - info.start) / (info.end - info.start);
+		return (timeWarp.unWarp(info.now) - timeWarp.unWarp(info.start))
+				/ (timeWarp.unWarp(info.end) - timeWarp.unWarp(info.start));
 	}
 
 	public float getTimeToLift(supportLabel limb) {
 		LiftTimeInfo info = limbPatterns.get(limb.ordinal())
-				.getTimeToLiftAtTime(phase);
+				.getTimeToLiftAtTime(timeWarp.getPhaseAtTime(phase));
 		if (info == null)
 			return 0f;
-		return info.lift - info.now;
+		return timeWarp.unWarp(info.lift) - timeWarp.unWarp(info.now);
 	}
 
 	public float getPhase() {
 		return phase;
 	}
 
-	public float getMinFiniteTime() {
+	public float getMinFinitePhase() {
 		float ret = Float.POSITIVE_INFINITY;
 
 		Entry<Float, supportInfo> ent;
@@ -228,7 +242,15 @@ public class SupportPattern {
 		return ret;
 	}
 
+	public float getMinFiniteTime() {
+		return timeWarp.unWarp(getMinFinitePhase());
+	}
+
 	public float getMaxFiniteTime() {
+		return timeWarp.unWarp(getMaxFinitePhase());
+	}
+
+	public float getMaxFinitePhase() {
 		float ret = Float.NEGATIVE_INFINITY;
 
 		Entry<Float, supportInfo> ent;
@@ -262,8 +284,8 @@ public class SupportPattern {
 		g.setCamera(0, 0, 400);
 
 		float minFinite, maxFinite;
-		minFinite = Math.min(0, getMinFiniteTime());
-		maxFinite = Math.max(1, getMaxFiniteTime() + 1);
+		minFinite = Math.min(0, getMinFinitePhase());
+		maxFinite = Math.max(1, getMaxFinitePhase() + 1);
 
 		float boxWidth = 1.0f, boxHeight = .4f, boxLeftX = -.95f, boxBotY = .5f;
 
@@ -299,7 +321,7 @@ public class SupportPattern {
 						/ (maxFinite - minFinite));
 
 				g.drawSolidPolygon(box, 4,
-						stripeColors[getInfoAtTime(i, boxBegin).ls.ordinal()]);
+						stripeColors[getInfoAtPhase(i, boxBegin).ls.ordinal()]);
 
 				boxBegin = boxEnd;
 				boxEnd = map.higherKey(boxEnd);
@@ -313,7 +335,7 @@ public class SupportPattern {
 			box[3].x = (float) (boxLeftX + boxWidth);
 
 			g.drawSolidPolygon(box, 4,
-					stripeColors[getInfoAtTime(i, boxBegin).ls.ordinal()]);
+					stripeColors[getInfoAtPhase(i, boxBegin).ls.ordinal()]);
 
 		}
 
@@ -411,6 +433,12 @@ public class SupportPattern {
 				/ (maxFinite - minFinite), boxBotY), new Vec2(boxLeftX
 				+ (phase - minFinite) / (maxFinite - minFinite), boxBotY
 				+ boxHeight), Color3f.WHITE);
+
+		g.drawSegment(new Vec2(boxLeftX
+				+ (timeWarp.getPhaseAtTime(phase) - minFinite)
+				/ (maxFinite - minFinite), boxBotY), new Vec2(boxLeftX
+				+ (timeWarp.getPhaseAtTime(phase) - minFinite)
+				/ (maxFinite - minFinite), boxBotY + boxHeight), Color3f.WHITE);
 
 		// return the camera to where it was
 		g.setCamera(GetUpScenario.defaultCameraParams.x,

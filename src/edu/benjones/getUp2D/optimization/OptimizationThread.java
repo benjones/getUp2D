@@ -7,7 +7,7 @@ import java.util.Random;
 import org.jbox2d.dynamics.DebugDraw;
 
 import edu.benjones.getUp2D.Controllers.SPController;
-import edu.benjones.getUp2D.Controllers.SupportPatterns.ParameterizedLyingGenerator;
+import edu.benjones.getUp2D.Controllers.SupportPatterns.WarpedLyingPatternGenerator;
 import edu.benjones.getUp2D.Utils.BufferedImageDebugDraw;
 import edu.benjones.getUp2D.Utils.FileUtils;
 
@@ -126,12 +126,14 @@ public class OptimizationThread extends AbstractOptimizationThread {
 	protected void updateParameters() {
 		updatedParameters = new float[initialParameters.length];
 
-		float tweakPercentage = (float) (rand.nextGaussian() * .3);// center on
-																	// .3
+		float tweakPercentage = (float) (.2 + rand.nextGaussian() * .15f);// center
+																			// on
+																			// .3
 		tweakPercentage = Math.min(1.0f, Math.max(.1f, tweakPercentage));
 		// c.amp from .1f to 1.0f
 
 		int tweaks = (int) (initialParameters.length * tweakPercentage);
+		System.out.println("tweaks: " + tweaks);
 
 		ArrayList<Integer> indeces = new ArrayList<Integer>(
 				initialParameters.length);
@@ -168,7 +170,8 @@ public class OptimizationThread extends AbstractOptimizationThread {
 		setupCharacter();
 		updateParameters();
 		controller = new SPController(character,
-				new ParameterizedLyingGenerator(), updatedParameters);
+		// new ParameterizedLyingGenerator(),
+				new WarpedLyingPatternGenerator(), updatedParameters);
 
 		float successTime = evaluate(false);
 		/*
@@ -189,11 +192,14 @@ public class OptimizationThread extends AbstractOptimizationThread {
 			FileUtils.writeParameters("FAIL.Par", updatedParameters);
 
 			// record the error:
-			/*
-			 * time = 0; character.destroy(); setupCharacter(); controller = new
-			 * SPController(character, new ParameterizedLyingGenerator(),
-			 * updatedParameters); evaluate(timestep, true);
-			 */
+
+			// time = 0;
+			// character.destroy();
+			// setupCharacter();
+			// controller = new SPController(character,
+			// new ParameterizedLyingGenerator(), updatedParameters);
+			// evaluate(true);
+
 			if (debugDraw instanceof BufferedImageDebugDraw) {
 				((BufferedImageDebugDraw) debugDraw)
 						.saveImage("debugFrames/frameFAIL" + stepNumber

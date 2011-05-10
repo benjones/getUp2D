@@ -104,23 +104,23 @@ public class SupportPatternTest {
 		s.addLimbStatus(SupportPattern.supportLabel.leftArm, .5f,
 				new SupportPattern.supportInfo(SupportPattern.limbStatus.swing,
 						false, 0f));
-
-		assertEquals(MathUtils.floatEquals(s.getMinFiniteTime(), 0.5f), true);
-		assertEquals(MathUtils.floatEquals(s.getMaxFiniteTime(), 0.5f), true);
+		s.setTimeWarp(new TimeWarp(-5, 20));
+		assertEquals(MathUtils.floatEquals(s.getMinFinitePhase(), 0.5f), true);
+		assertEquals(MathUtils.floatEquals(s.getMaxFinitePhase(), 0.5f), true);
 
 		s.addHipHeightKnot(new Trajectory1D.entry(-1f, 1f));
-		assertEquals(MathUtils.floatEquals(s.getMinFiniteTime(), -1f), true);
-		assertEquals(MathUtils.floatEquals(s.getMaxFiniteTime(), 0.5f), true);
+		assertEquals(MathUtils.floatEquals(s.getMinFinitePhase(), -1f), true);
+		assertEquals(MathUtils.floatEquals(s.getMaxFinitePhase(), 0.5f), true);
 
 		s.addShoulderHeightKnot(new Trajectory1D.entry(2f, 1f));
-		assertEquals(MathUtils.floatEquals(s.getMinFiniteTime(), -1f), true);
-		assertEquals(MathUtils.floatEquals(s.getMaxFiniteTime(), 2f), true);
+		assertEquals(MathUtils.floatEquals(s.getMinFinitePhase(), -1f), true);
+		assertEquals(MathUtils.floatEquals(s.getMaxFinitePhase(), 2f), true);
 
 		s.addLimbStatus(SupportPattern.supportLabel.leftArm, 3.5f,
 				new SupportPattern.supportInfo(SupportPattern.limbStatus.swing,
 						false, 0f));
-		assertEquals(MathUtils.floatEquals(s.getMinFiniteTime(), -1f), true);
-		assertEquals(MathUtils.floatEquals(s.getMaxFiniteTime(), 3.5f), true);
+		assertEquals(MathUtils.floatEquals(s.getMinFinitePhase(), -1f), true);
+		assertEquals(MathUtils.floatEquals(s.getMaxFinitePhase(), 3.5f), true);
 	}
 
 }

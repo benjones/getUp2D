@@ -21,7 +21,7 @@ import org.jbox2d.dynamics.contacts.ContactResult;
 import edu.benjones.getUp2D.Controllers.Controller;
 import edu.benjones.getUp2D.Controllers.PoseController;
 import edu.benjones.getUp2D.Controllers.SPController;
-import edu.benjones.getUp2D.Controllers.SupportPatterns.ParameterizedLyingGenerator;
+import edu.benjones.getUp2D.Controllers.SupportPatterns.WarpedLyingPatternGenerator;
 import edu.benjones.getUp2D.Utils.FileUtils;
 import edu.benjones.getUp2D.characters.Biped9;
 
@@ -162,10 +162,14 @@ public class GetUpScenario {
 		// controller = new PoseController(character);
 		System.out.println("loading controller");
 
-		controller = new SPController(character,
-				new ParameterizedLyingGenerator(),
-				FileUtils.readParameters("../SPParameters/improvement49.par"));
-
+		// controller = new SPController(character,
+		// new ParameterizedLyingGenerator(),
+		// FileUtils.readParameters("../SPParameters/dart.par"));
+		controller = new SPController(
+				character,
+				new WarpedLyingPatternGenerator(),
+				FileUtils
+						.readParameters("../SPParameters/warpedImprovement79.par"));
 		// controller = new SPController(character, new
 		// LyingPatternGenerator());
 

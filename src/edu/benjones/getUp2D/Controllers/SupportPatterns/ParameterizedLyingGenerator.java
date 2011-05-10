@@ -4,6 +4,7 @@ import edu.benjones.getUp2D.Controllers.SupportPattern;
 import edu.benjones.getUp2D.Controllers.SupportPattern.limbStatus;
 import edu.benjones.getUp2D.Controllers.SupportPattern.supportInfo;
 import edu.benjones.getUp2D.Controllers.SupportPattern.supportLabel;
+import edu.benjones.getUp2D.Utils.TimeWarp;
 import edu.benjones.getUp2D.Utils.Trajectory1D.entry;
 
 public class ParameterizedLyingGenerator implements
@@ -203,6 +204,8 @@ public class ParameterizedLyingGenerator implements
 		sp.addHipHeightKnot(new entry(parameters[lyingParamOffsets.hipT6
 				.ordinal()], parameters[lyingParamOffsets.hipV6.ordinal()]));
 
+		sp.setTimeWarp(new TimeWarp(0, 20, 10));
+		sp.getTimeWarp().setWarp(0, 5f);
 		return sp;
 	}
 }

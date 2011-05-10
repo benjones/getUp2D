@@ -40,8 +40,12 @@ public class Optimize {
 		}
 
 		float[] initialParameters = FileUtils
-				.readParameters("./SPParameters/dart.par");
-		float[] limits = FileUtils.readParameters("./SPParameters/limits.par");
+				.readParameters("./SPParameters/warpedDart.par");
+		// .readParameters("./SPParameters/dart.par");
+		// float[] limits =
+		// FileUtils.readParameters("./SPParameters/limits.par");
+		float[] limits = FileUtils
+				.readParameters("./SPParameters/warpedLyingLimits.par");
 		for (int i = 0; i < numThreads; ++i)
 			threads[i].setParameterMaxDelta(limits);
 
@@ -95,7 +99,7 @@ public class Optimize {
 				System.out.println("bestSoFar improved " + improvements
 						+ " times");
 				costOverTime.add(minCost);
-				FileUtils.writeParameters("./SPParameters/improvement"
+				FileUtils.writeParameters("./SPParameters/warpedImprovement"
 						+ improvements + ".par", initialParameters);
 				iterationsSinceImprovement = 0;
 				gaussianScale = 1.0f;
@@ -109,27 +113,31 @@ public class Optimize {
 			} else {
 				System.out.println("Nothing better than bestSoFar");
 				iterationsSinceImprovement++;
-				if (iterationsSinceImprovement > 10) {
-					if (optimizationType == costType.endTime) {
-						optimizationType = costType.footWidth;
-						System.out.println("switching to foot optimization");
-					} else {
-						optimizationType = costType.endTime;
-						System.out.println("switching to time optimization");
-					}
-					iterationsSinceImprovement = 0;
+				if (iterationsSinceImprovement > 5) {
+					gaussianScale += .05;
+					/*
+					 * if (optimizationType == costType.endTime) {
+					 * optimizationType = costType.footWidth;
+					 * System.out.println("switching to foot optimization"); }
+					 * else { optimizationType = costType.endTime;
+					 * System.out.println("switching to time optimization"); }
+					 * iterationsSinceImprovement = 0;
+					 */
 				}
 				if (minCost == Float.POSITIVE_INFINITY) {
 					System.out.println("all failures: " + iteration);
-					FileUtils.writeParameters(
-							"./SPParameters/FAIL" + iteration,
-							threads[0].getUpdatedParameters());
+					FileUtils.writeParameters("./SPParameters/WarpedFAIL"
+							+ iteration, threads[0].getUpdatedParameters());
+				}
+				if (iterationsSinceImprovement > 10) {
+					System.out.println("Probably found a minimum.");
+					stop = true;
 				}
 			}
 
 			System.out.println("minCost is: " + minCost);
 			if (iteration % 100 == 0) {
-				FileUtils.writeParameters("./SPParameters/0504iteration"
+				FileUtils.writeParameters("./SPParameters/0510Warpediteration"
 						+ iteration + ".par", initialParameters);
 			}
 
