@@ -100,8 +100,7 @@ public class SPController extends PoseController {
 			sp.advancePhase(dt);
 
 		for (supportLabel limb : supportLabel.values()) {
-			limbs[limb.ordinal()].setPose(sp.getPattern(limb), sp.getPhase(),
-					desiredPose);
+			limbs[limb.ordinal()].setPose(desiredPose);
 		}
 		// modify torques
 		for (int i = 0; i < controlParams.size(); ++i) {

@@ -15,7 +15,7 @@ public class TimeWarp {
 	ArrayList<Float> phaseVelocities;
 	ArrayList<Float> trapAreas;
 
-	private float beginTime, endTime;// real time begin/end times
+	private float beginTime;// real time begin/end times
 	private float dt;
 
 	public TimeWarp(float beginTime, float endTime) {
@@ -25,7 +25,6 @@ public class TimeWarp {
 	public TimeWarp(float beginTime, float endTime, int numSegments) {
 		this.numSegments = numSegments;
 		this.beginTime = beginTime;
-		this.endTime = endTime;
 		phaseVelocities = new ArrayList<Float>(numSegments + 1);
 		trapAreas = new ArrayList<Float>(numSegments);
 
@@ -46,16 +45,59 @@ public class TimeWarp {
 		float delta = t - beginTime;
 		float ret = beginTime;
 		int i = 0;
-		while (delta > dt) {
+		while (delta > dt && i < trapAreas.size()) {
 			delta -= dt;
 			ret += trapAreas.get(i);
 			++i;
 		}
-		float a = phaseVelocities.get(i);
-		float b = phaseVelocities.get(i + 1);
-		float midpoint = a + (b - a) * delta / dt;
-		float partArea = (a + midpoint) * delta * .5f;
-		ret += partArea;
+		if (i + 1 < phaseVelocities.size()) {
+			float a = phaseVelocities.get(i);
+			float b = phaseVelocities.get(i + 1);
+			float midpoint = a + (b - a) * delta / dt;
+			float partArea = (a + midpoint) * delta * .5f;
+			ret += partArea;
+			return ret;
+		} else {
+			// use the last available slope info
+			float a = phaseVelocities.get(i);
+			ret += a * delta;
+			return ret;
+		}
+	}
+
+	public float unWarp(float warpedTime) {
+		if (warpedTime <= beginTime) {
+			return beginTime;
+		}
+		float delta = warpedTime - beginTime;
+		float ret = beginTime;
+		int i = 0;
+		while (i < trapAreas.size() && delta > trapAreas.get(i)) {
+			delta -= trapAreas.get(i);
+			ret += dt;
+			++i;
+		}
+		// now handle the last piece
+		if (i + 1 < phaseVelocities.size()) {
+			// solve a quadratic:
+			float start = phaseVelocities.get(i);
+			float stop = phaseVelocities.get(i + 1);
+			float a = (stop - start) / (2 * dt);
+			float b = start;
+			float c = -delta;
+			if (MathUtils.floatEquals(a, 0)) {
+				ret += delta / phaseVelocities.get(i);
+			} else {
+				float sol = (float) (-b / (2 * a) + Math
+						.sqrt(b * b - 4 * a * c) / (2 * a));
+
+				ret += sol;
+			}
+
+		} else {
+			ret += delta / phaseVelocities.get(i);
+		}
+
 		return ret;
 	}
 

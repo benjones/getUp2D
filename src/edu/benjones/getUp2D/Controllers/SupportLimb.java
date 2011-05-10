@@ -10,7 +10,6 @@ import org.jbox2d.dynamics.DebugDraw;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 
 import edu.benjones.getUp2D.Character.Limb;
-import edu.benjones.getUp2D.Controllers.SupportPattern.limbPattern;
 import edu.benjones.getUp2D.Controllers.SupportPattern.limbStatus;
 import edu.benjones.getUp2D.Controllers.SupportPattern.supportInfo;
 import edu.benjones.getUp2D.Controllers.SupportPattern.supportLabel;
@@ -81,9 +80,8 @@ public class SupportLimb {
 	protected boolean halfwayDone;// we'll re-evaluate where the swing EE is
 									// halfway through
 
-	public void setPose(limbPattern pattern, float phase, float[] desiredPose) {
-
-		supportInfo info = pattern.getInfoAtTime(phase);
+	public void setPose(float[] desiredPose) {
+		supportInfo info = parent.getInfoNow(limbLabel);
 		if (info.ls != lastInfo.ls || info.kneel != lastInfo.kneel) {
 			if (info.ls == limbStatus.swing) {
 				if (info.kneel) {
@@ -115,7 +113,7 @@ public class SupportLimb {
 		if (info.ls == limbStatus.idle) {
 			ikTarg = limb.getEndEffectorPosition();
 		} else if (info.ls == limbStatus.swing) {
-			float swingPhase = pattern.getSwingPhaseAtTime(phase);
+			float swingPhase = parent.getSwingPhase(limbLabel);
 			if (swingPhase > .5 && !halfwayDone) {
 				halfwayDone = true;
 				// reset the ik target to handle movement by the base

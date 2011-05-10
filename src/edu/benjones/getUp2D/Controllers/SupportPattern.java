@@ -10,6 +10,9 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.DebugDraw;
 
 import edu.benjones.getUp2D.GetUpScenario;
+import edu.benjones.getUp2D.Controllers.SupportPattern.limbPattern.LiftTimeInfo;
+import edu.benjones.getUp2D.Controllers.SupportPattern.limbPattern.SwingPhaseInfo;
+import edu.benjones.getUp2D.Utils.TimeWarp;
 import edu.benjones.getUp2D.Utils.Trajectory1D;
 
 public class SupportPattern {
@@ -33,10 +36,16 @@ public class SupportPattern {
 			return pattern.floorEntry(t).getValue();
 		}
 
-		public float getSwingPhaseAtTime(float t) {
+		public class SwingPhaseInfo {
+			public float start;
+			public float end;
+			public float now;
+		}
+
+		public SwingPhaseInfo getSwingPhaseInfoAtTime(float t) {
 			supportInfo info = getInfoAtTime(t);
 			if (info.ls != limbStatus.swing) {
-				return 0f;
+				return null;
 			}
 
 			Entry<Float, supportInfo> ent = pattern.floorEntry(t);
@@ -56,14 +65,23 @@ public class SupportPattern {
 			}
 
 			if (end == start)
-				return 0f;
-			return (t - start) / (end - start);
+				return null;
+			SwingPhaseInfo ret = new SwingPhaseInfo();
+			ret.start = start;
+			ret.end = end;
+			ret.now = t;
+			return ret;
 		}
 
-		public float getTimeToLiftAtTime(float t) {
+		public class LiftTimeInfo {
+			public float now;
+			public float lift;
+		}
+
+		public LiftTimeInfo getTimeToLiftAtTime(float t) {
 			supportInfo info = getInfoAtTime(t);
 			if (info.ls != limbStatus.stance)
-				return 0;
+				return null;
 
 			Entry<Float, supportInfo> ent = pattern.ceilingEntry(t);
 			float end = ent.getKey();
@@ -71,7 +89,10 @@ public class SupportPattern {
 				ent = pattern.higherEntry(ent.getKey());
 				end = ent.getKey();
 			}
-			return end - t;
+			LiftTimeInfo ret = new LiftTimeInfo();
+			ret.lift = end;
+			ret.now = t;
+			return ret;
 		}
 
 	}
@@ -123,10 +144,6 @@ public class SupportPattern {
 
 	}
 
-	public limbPattern getPattern(supportLabel label) {
-		return limbPatterns.get(label.ordinal());
-	}
-
 	public void addLimbStatus(supportLabel limb, float time, supportInfo info) {
 		limbPatterns.get(limb.ordinal()).put(time, info);
 	}
@@ -144,35 +161,45 @@ public class SupportPattern {
 	}
 
 	public float getHipHeightAtTime(float t) {
-		return hipHeight.evaluateLinear(t);
+		return hipHeight.evaluateLinear(timeWarp.getPhaseAtTime(t));
 	}
 
 	public float getShoulderHeightAtTime(float t) {
-		return shoulderHeight.evaluateLinear(t);
+		return shoulderHeight.evaluateLinear(timeWarp.getPhaseAtTime(t));
 	}
 
 	public float getHipHeightNow() {
-		return getHipHeightAtTime(phase);
+		return getHipHeightAtTime(timeWarp.getPhaseAtTime(phase));
 	}
 
 	public float getShoulderHeightNow() {
-		return getShoulderHeightAtTime(phase);
+		return getShoulderHeightAtTime(timeWarp.getPhaseAtTime(phase));
 	}
 
 	public supportInfo getInfoAtTime(supportLabel limb, float t) {
-		return limbPatterns.get(limb.ordinal()).getInfoAtTime(t);
+		return limbPatterns.get(limb.ordinal()).getInfoAtTime(
+				timeWarp.getPhaseAtTime(t));
 	}
 
 	public supportInfo getInfoNow(supportLabel limb) {
-		return getInfoAtTime(limb, phase);
+		return getInfoAtTime(limb, timeWarp.getPhaseAtTime(phase));
 	}
 
 	public float getSwingPhase(supportLabel limb) {
-		return limbPatterns.get(limb.ordinal()).getSwingPhaseAtTime(phase);
+		// this info is in the "warped" time-frame
+		SwingPhaseInfo info = limbPatterns.get(limb.ordinal())
+				.getSwingPhaseInfoAtTime(timeWarp.getPhaseAtTime(phase));
+		if (info == null)
+			return 0f;
+		return (info.now - info.start) / (info.end - info.start);
 	}
 
 	public float getTimeToLift(supportLabel limb) {
-		return limbPatterns.get(limb.ordinal()).getTimeToLiftAtTime(phase);
+		LiftTimeInfo info = limbPatterns.get(limb.ordinal())
+				.getTimeToLiftAtTime(phase);
+		if (info == null)
+			return 0f;
+		return info.lift - info.now;
 	}
 
 	public float getPhase() {
@@ -498,4 +525,13 @@ public class SupportPattern {
 		this.shouldersVerticalKP = shouldersVerticalKP;
 	}
 
+	protected TimeWarp timeWarp;
+
+	public void setTimeWarp(TimeWarp tw) {
+		timeWarp = tw;
+	}
+
+	public TimeWarp getTimeWarp() {
+		return timeWarp;
+	}
 }
