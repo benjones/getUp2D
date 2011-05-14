@@ -27,6 +27,14 @@ public abstract class AbstractOptimizationThread extends GetUpScenario
 		}
 	}
 
+	public float[] getInitialParameters() {
+		float[] ret = new float[initialParameters.length];
+		for (int i = 0; i < initialParameters.length; ++i) {
+			ret[i] = initialParameters[i];
+		}
+		return ret;
+	}
+
 	public void setParameterMaxDelta(float[] delta) {
 		parameterMaxDelta = new float[delta.length];
 		for (int i = 0; i < parameterMaxDelta.length; ++i) {

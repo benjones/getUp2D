@@ -169,7 +169,7 @@ public class GetUpScenario {
 				character,
 				new WarpedLyingPatternGenerator(),
 				FileUtils
-						.readParameters("../SPParameters/warpedImprovement79.par"));
+						.readParameters("../SPParameters/warpedImprovement250.par"));
 		// controller = new SPController(character, new
 		// LyingPatternGenerator());
 

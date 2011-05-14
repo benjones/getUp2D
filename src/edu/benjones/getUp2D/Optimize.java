@@ -129,10 +129,11 @@ public class Optimize {
 					FileUtils.writeParameters("./SPParameters/WarpedFAIL"
 							+ iteration, threads[0].getUpdatedParameters());
 				}
-				if (iterationsSinceImprovement > 10) {
-					System.out.println("Probably found a minimum.");
-					stop = true;
-				}
+				/*
+				 * if (iterationsSinceImprovement > 20) {
+				 * System.out.println("Probably found a minimum."); stop = true;
+				 * }
+				 */
 			}
 
 			System.out.println("minCost is: " + minCost);

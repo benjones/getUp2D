@@ -30,4 +30,11 @@ public class MathUtils {
 		return Math.max(-range, Math.min(v, range));
 	}
 
+	public static float[] arrayMultAdd(float[] a, float[] b, float alpha) {
+		float[] ret = new float[a.length];
+		for (int i = 0; i < a.length; ++i) {
+			ret[i] = a[i] + b[i] * alpha;
+		}
+		return ret;
+	}
 }
