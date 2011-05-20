@@ -11,17 +11,15 @@ import edu.benjones.getUp2D.optimization.NTestThread;
 public class NTest {
 	protected final static int numJobs = 128;
 
-	static protected int first = 30;
-	static protected int last = 50;
+	static protected float first = -.1f;
+	static protected float last = -.19f;
 
 	public static void main(String[] args) {
 
 		float[] startParams = FileUtils
-				.readParameters("./SPParameters/warpedImprovement" + first
-						+ ".par");
+				.readParameters("./SPParameters/continuationDownhillResult-0.09999998.par");
 		float[] endParams = FileUtils
-				.readParameters("./SPParameters/warpedImprovement" + last
-						+ ".par");
+				.readParameters("./SPParameters/continuationDownhillResult-0.19000003.par");
 
 		float[] diff = new float[startParams.length];
 		for (int i = 0; i < diff.length; ++i) {
@@ -32,11 +30,11 @@ public class NTest {
 
 		ExecutorService es = Executors.newCachedThreadPool();
 		for (int i = 0; i < numJobs; ++i) {
+			float ratio = (float) (i) / (float) (numJobs - 1);
 			evalThreads[i] = new NTestThread(null);
 			evalThreads[i].setInitialParameters(MathUtils.arrayMultAdd(
-					startParams, diff, 1.5f * (float) (i)
-							/ (float) (numJobs - 1)));
-
+					startParams, diff, ratio));
+			evalThreads[i].setGroundAngle(first + ratio * (last - first));
 			es.execute(evalThreads[i]);
 		}
 

@@ -67,7 +67,7 @@ public class GetUpScenario {
 	protected boolean drawControllerExtras;
 	private boolean desiredPoseSetup;
 
-	private Body ground;
+	protected Body ground;
 
 	protected float simSpeed;
 	protected final float timestep;
@@ -169,7 +169,8 @@ public class GetUpScenario {
 				character,
 				new WarpedLyingPatternGenerator(),
 				FileUtils
-						.readParameters("../SPParameters/warpedImprovement250.par"));
+						.readParameters("../SPParameters/continuationDownhillResult-0.19000003.par"));
+		setGroundAngle(-.19f);
 		// controller = new SPController(character, new
 		// LyingPatternGenerator());
 
@@ -312,6 +313,14 @@ public class GetUpScenario {
 				originalPosition.angle, zeros);
 		if (controller != null)
 			controller.reset();
+	}
+
+	public void setGroundAngle(float angle) {
+		ground.setXForm(ground.getPosition(), angle);
+	}
+
+	public float getGroundAngle() {
+		return ground.getAngle();
 	}
 
 }

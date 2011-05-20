@@ -92,10 +92,11 @@ public class getUpMain extends PApplet {
 			if (doReset) {
 				doReset = false;
 				getUpScenario.reset();
+
 			}
 			getUpScenario.step();
 
-			// this.saveFrame();
+			this.saveFrame();
 			// I could also maybe look at using movie maker
 		}
 	}

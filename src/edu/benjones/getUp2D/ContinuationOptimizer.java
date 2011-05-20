@@ -72,6 +72,8 @@ public class ContinuationOptimizer {
 			float bestAverageCost;
 			float averageCost;
 
+			// consider using "sum of successes" as an improvment metric
+
 			int numSuccesses;
 			do {
 				bestAverageCost = Float.POSITIVE_INFINITY;
@@ -97,9 +99,10 @@ public class ContinuationOptimizer {
 					// float bestNeighborCost = Float.POSITIVE_INFINITY;
 					for (int i = 0; i < numNeighbors; ++i) {
 						c = neighborThreads.get(i).getCost();
-						averageCost += c;
+
 						if (c < Float.POSITIVE_INFINITY) {
 							numSuccesses++;
+							averageCost += c;
 							// if (c < bestNeighborCost) {
 							// bestNeighborCost = c;
 							// bestNeighborParams = neighborThreads.get(i)
@@ -109,7 +112,7 @@ public class ContinuationOptimizer {
 						}
 					}
 					// compare results for the different tweaks
-					averageCost /= numNeighbors;
+					averageCost /= numSuccesses;
 					if (numSuccesses > maxNumSuccesses) {
 						maxNumSuccesses = numSuccesses;
 						bestParams = tweakedParameters;
@@ -117,7 +120,8 @@ public class ContinuationOptimizer {
 								.println("more successes, updated bestParams");
 					}
 					if (numSuccesses == maxNumSuccesses) {
-						if (averageCost < bestAverageCost) {
+						if (!Float.isNaN(averageCost)
+								&& averageCost < bestAverageCost) {
 							bestAverageCost = averageCost;
 							bestParams = tweakedParameters;
 							System.out.println("lower cost, updatedBestParams");
@@ -127,17 +131,30 @@ public class ContinuationOptimizer {
 							+ numSuccesses);
 				}
 				// update and try again
-				System.out.println("Parameters updated");
+				System.out.println("Parameters updated, avg cost is: "
+						+ bestAverageCost);
 
-			} while (maxNumSuccesses < numNeighbors);
+			} while (maxNumSuccesses < numNeighbors * .8f);// accept a couple of
+															// failures
 
+			// update the world
+			float angle = neighborThreads.get(0).getGroundAngle();
 			System.out.println("best params: ");
 			for (float p : bestParams)
 				System.out.println(p);
 
-			// change the environment
-			stop = true;
+			FileUtils.writeParameters(
+					"./SPParameters/continuationDownhillResult" + angle
+							+ ".par", bestParams);
+
+			for (ContinuationThread c : neighborThreads) {
+				c.setGroundAngle(angle - .01f);
+			}
+
+			// stop = true;
 		}
+
+		es.shutdown();
 
 	}
 

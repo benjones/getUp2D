@@ -152,5 +152,6 @@ public class Optimize {
 		for (float c : costOverTime)
 			System.out.println(c);
 
+		System.exit(0);
 	}
 }
