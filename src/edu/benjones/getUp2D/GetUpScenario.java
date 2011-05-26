@@ -24,6 +24,7 @@ import edu.benjones.getUp2D.Controllers.SPController;
 import edu.benjones.getUp2D.Controllers.SupportPatterns.WarpedLyingPatternGenerator;
 import edu.benjones.getUp2D.Utils.FileUtils;
 import edu.benjones.getUp2D.characters.Biped9;
+import edu.benjones.getUp2D.characters.ParameterizedBiped9;
 
 public class GetUpScenario {
 
@@ -149,7 +150,7 @@ public class GetUpScenario {
 	}
 
 	public void setupCharacter() {
-		character = new Biped9(world, this);
+		character = new ParameterizedBiped9(world, this, 1.42f);
 		float[] zeros = new float[character.getStateSize()];
 		character.setState(new Vec2(originalPosition.x, originalPosition.y),
 				originalPosition.angle, zeros);
@@ -169,8 +170,8 @@ public class GetUpScenario {
 				character,
 				new WarpedLyingPatternGenerator(),
 				FileUtils
-						.readParameters("../SPParameters/continuationDownhillResult-0.19000003.par"));
-		setGroundAngle(-.19f);
+						.readParameters("../SPParameters/continuationRootScale1.4199996.par"));
+		// setGroundAngle(-.19f);
 		// controller = new SPController(character, new
 		// LyingPatternGenerator());
 

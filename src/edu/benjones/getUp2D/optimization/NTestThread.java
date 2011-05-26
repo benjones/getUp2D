@@ -1,14 +1,27 @@
 package edu.benjones.getUp2D.optimization;
 
+import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.DebugDraw;
 
 import edu.benjones.getUp2D.Controllers.SPController;
 import edu.benjones.getUp2D.Controllers.SupportPatterns.WarpedLyingPatternGenerator;
+import edu.benjones.getUp2D.characters.ParameterizedBiped9;
 
 public class NTestThread extends AbstractOptimizationThread {
 
+	protected float rootScale;
+
+	public float getRootScale() {
+		return rootScale;
+	}
+
+	public void setRootScale(float rootScale) {
+		this.rootScale = rootScale;
+	}
+
 	public NTestThread(DebugDraw g) {
 		super(g);
+		rootScale = 1.0f;
 		// TODO Auto-generated constructor stub
 	}
 
@@ -44,6 +57,14 @@ public class NTestThread extends AbstractOptimizationThread {
 
 	@Override
 	public void setupController() {
+	}
+
+	@Override
+	public void setupCharacter() {
+		character = new ParameterizedBiped9(world, this, rootScale);
+		float[] zeros = new float[character.getStateSize()];
+		character.setState(new Vec2(originalPosition.x, originalPosition.y),
+				originalPosition.angle, zeros);
 	}
 
 }

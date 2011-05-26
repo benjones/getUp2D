@@ -40,6 +40,8 @@ public class ContinuationOptimizer {
 	public static float[] parameterMaxDelta;
 	static boolean stop;
 
+	protected static float rootScale = 1.0f;
+
 	public static void main(String[] args) {
 		parameterMaxDelta = FileUtils
 				.readParameters("./SPParameters/warpedLyingLimits.par");
@@ -119,7 +121,7 @@ public class ContinuationOptimizer {
 						System.out
 								.println("more successes, updated bestParams");
 					}
-					if (numSuccesses == maxNumSuccesses) {
+					if (numSuccesses > 0 && numSuccesses == maxNumSuccesses) {
 						if (!Float.isNaN(averageCost)
 								&& averageCost < bestAverageCost) {
 							bestAverageCost = averageCost;
@@ -138,17 +140,18 @@ public class ContinuationOptimizer {
 															// failures
 
 			// update the world
-			float angle = neighborThreads.get(0).getGroundAngle();
+			// float angle = neighborThreads.get(0).getGroundAngle();
 			System.out.println("best params: ");
 			for (float p : bestParams)
 				System.out.println(p);
 
-			FileUtils.writeParameters(
-					"./SPParameters/continuationDownhillResult" + angle
-							+ ".par", bestParams);
+			FileUtils.writeParameters("./SPParameters/continuationRootScale"
+					+ rootScale + ".par", bestParams);
 
+			rootScale += .01;
 			for (ContinuationThread c : neighborThreads) {
-				c.setGroundAngle(angle - .01f);
+				// c.setGroundAngle(angle - .01f);
+				c.setRootScale(rootScale);
 			}
 
 			// stop = true;

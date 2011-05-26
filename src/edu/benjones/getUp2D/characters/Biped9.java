@@ -54,12 +54,18 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 	protected World world;
 	protected GetUpScenario scenario;
 
+	protected float rootScale;// Make the root bigger/smaller
+
 	public Biped9(World w, GetUpScenario scenario) {
+		this(w, scenario, 1.0f);
+	}
+
+	protected Biped9(World w, GetUpScenario scenario, float rootScale) {
 		this.scenario = scenario;
 		world = w;
 
-		shoulderTorsoOffset = new Vec2(.0f, .18f);
-		hipTorsoOffset = new Vec2(0f, -.18f);
+		shoulderTorsoOffset = new Vec2(.0f, .18f * rootScale);
+		hipTorsoOffset = new Vec2(0f, -.18f * rootScale);
 		shoulderUpperArmOffset = new Vec2(0f, -.12f);
 		hipUpperLegOffset = new Vec2(0f, .15f);
 		kneeUpperLegOffset = new Vec2(0f, -.15f);
@@ -74,7 +80,7 @@ public class Biped9 implements edu.benjones.getUp2D.Character {
 		rootDef.angle = 0;
 
 		PolygonDef rootPolyDef = new PolygonDef();
-		rootPolyDef.setAsBox(.08f, .20f);
+		rootPolyDef.setAsBox(.08f * rootScale, .20f * rootScale);
 		rootPolyDef.density = torsoDensity;// mass/area
 		rootPolyDef.filter.groupIndex = filterGroup;
 
