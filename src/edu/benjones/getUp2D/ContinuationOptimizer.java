@@ -148,7 +148,7 @@ public class ContinuationOptimizer {
 			FileUtils.writeParameters("./SPParameters/continuationRootScale"
 					+ rootScale + ".par", bestParams);
 
-			rootScale += .01;
+			rootScale += .005;
 			for (ContinuationThread c : neighborThreads) {
 				// c.setGroundAngle(angle - .01f);
 				c.setRootScale(rootScale);

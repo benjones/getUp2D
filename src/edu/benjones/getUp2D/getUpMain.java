@@ -96,7 +96,7 @@ public class getUpMain extends PApplet {
 			}
 			getUpScenario.step();
 
-			this.saveFrame();
+			// this.saveFrame();
 			// I could also maybe look at using movie maker
 		}
 	}

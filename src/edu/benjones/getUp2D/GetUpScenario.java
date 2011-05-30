@@ -150,7 +150,7 @@ public class GetUpScenario {
 	}
 
 	public void setupCharacter() {
-		character = new ParameterizedBiped9(world, this, 1.42f);
+		character = new ParameterizedBiped9(world, this, 1f);// .44f);
 		float[] zeros = new float[character.getStateSize()];
 		character.setState(new Vec2(originalPosition.x, originalPosition.y),
 				originalPosition.angle, zeros);
@@ -170,7 +170,7 @@ public class GetUpScenario {
 				character,
 				new WarpedLyingPatternGenerator(),
 				FileUtils
-						.readParameters("../SPParameters/continuationRootScale1.4199996.par"));
+						.readParameters("../SPParameters/warpedImprovement200.par"));
 		// setGroundAngle(-.19f);
 		// controller = new SPController(character, new
 		// LyingPatternGenerator());

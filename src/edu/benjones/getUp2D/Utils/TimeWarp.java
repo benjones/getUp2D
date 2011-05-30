@@ -2,6 +2,12 @@ package edu.benjones.getUp2D.Utils;
 
 import java.util.ArrayList;
 
+import org.jbox2d.common.Color3f;
+import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.DebugDraw;
+
+import edu.benjones.getUp2D.GetUpScenario;
+
 /**
  * Implements a "time warp". Given a "real time," wall clock time, maps into a
  * "phase time", which is the phase of the supportPattern
@@ -121,4 +127,60 @@ public class TimeWarp {
 		}
 
 	}
+
+	public void draw(DebugDraw g) {
+		g.setCamera(0, 0, 400);
+
+		float boxWidth = 1.0f, boxHeight = .2f, boxLeftX = -.95f, boxBotY = .3f;
+		Vec2[] box = { new Vec2(boxLeftX, boxBotY),
+				new Vec2(boxLeftX, boxBotY + boxHeight),
+				new Vec2(boxLeftX + boxWidth, boxBotY + boxHeight),
+				new Vec2(boxLeftX + boxWidth, boxBotY) };
+		g.drawSolidPolygon(box, 4, Color3f.BLUE);
+
+		float maxMag = Math.max(getMaxIntensity(), 1f) * 1.1f;// add a little
+																// extra scaling
+		// draw lines at 0, 1
+		Vec2 lineStart = new Vec2();
+		Vec2 lineEnd = new Vec2();
+
+		lineStart.x = boxLeftX;
+		lineStart.y = boxBotY + .01f;
+		lineEnd.x = boxLeftX + boxWidth;
+		lineEnd.y = lineStart.y;
+		g.drawSegment(lineStart, lineEnd, Color3f.WHITE);
+
+		lineStart.y = boxBotY + .01f + 1f * boxHeight / maxMag;
+		lineEnd.y = lineStart.y;
+		g.drawSegment(lineStart, lineEnd, Color3f.WHITE);
+
+		ArrayList<Float> mappedPVs = new ArrayList<Float>(
+				phaseVelocities.size());
+		for (float pv : phaseVelocities) {
+			mappedPVs.add(boxBotY + .01f + pv * boxHeight / maxMag);
+		}
+		for (int i = 0; i < (phaseVelocities.size() - 1); ++i) {
+			lineStart.x = boxLeftX + i * boxWidth
+					/ (phaseVelocities.size() - 1);
+			lineStart.y = mappedPVs.get(i);
+			lineEnd.x = boxLeftX + (i + 1) * boxWidth
+					/ (phaseVelocities.size() - 1);
+			lineEnd.y = mappedPVs.get(i + 1);
+			g.drawSegment(lineStart, lineEnd, Color3f.RED);
+		}
+
+		g.setCamera(GetUpScenario.defaultCameraParams.x,
+				GetUpScenario.defaultCameraParams.y,
+				GetUpScenario.defaultCameraParams.scale);
+	}
+
+	public float getMaxIntensity() {
+		float ret = Float.NEGATIVE_INFINITY;
+		for (float f : this.phaseVelocities) {
+			if (f > ret)
+				ret = f;
+		}
+		return ret;
+	}
+
 }

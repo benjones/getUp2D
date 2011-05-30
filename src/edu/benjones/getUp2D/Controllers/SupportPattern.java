@@ -445,6 +445,8 @@ public class SupportPattern {
 				GetUpScenario.defaultCameraParams.y,
 				GetUpScenario.defaultCameraParams.scale);
 
+		timeWarp.draw(g);
+
 	}
 
 	public void reset() {
